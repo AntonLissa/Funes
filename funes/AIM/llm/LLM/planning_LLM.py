@@ -1,6 +1,6 @@
 
 
-from Scripts.AIM.llm.LLM.BaseLLM import BaseLLM
+from funes.AIM.llm.LLM.base_llm import BaseLLM
 
 
 class PlanningLLM(BaseLLM):
@@ -23,5 +23,3 @@ class PlanningLLM(BaseLLM):
             sequence_of_events=data['soe'],
             conversation_history=self.session_history
         )
-
-

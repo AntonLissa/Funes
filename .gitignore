@@ -20,3 +20,6 @@ data_examples/
 # api keys
 Scripts/AIM/llm/api_key.txt
 .env
+
+# egg
+*.egg-info/

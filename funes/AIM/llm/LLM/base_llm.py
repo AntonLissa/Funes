@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from Scripts.AIM.llm.provider.provider import Provider
+from funes.AIM.llm.provider.provider import Provider
 
 class BaseLLM(ABC):
 
