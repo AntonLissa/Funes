@@ -1,5 +1,6 @@
 from pathlib import Path
 import yaml
+import os
 
 class ConfigLoader:
     def __init__(self, base_path: Path = None):
@@ -7,12 +8,19 @@ class ConfigLoader:
         self.config = {}
         self.api_key = None
 
-    def load_api_key(self, filename="api_key.txt"):
-        key_path = self.base_path / filename
-        if not key_path.exists():
-            raise FileNotFoundError(f"API key file not found at {key_path}")
-        self.api_key = key_path.read_text().strip()
-        return self.api_key
+    def load_api_key(self, env_var_name="GROQ_API_KEY"):
+        """
+        Carica l'API key da variabile d'ambiente, fallback a file locale.
+        """
+        key = os.getenv(env_var_name)
+        if key:
+            self.api_key = key.strip()
+            return self.api_key
+
+
+        raise FileNotFoundError(
+            f"API key not found. Tried env var '{env_var_name}'"
+        )
 
     def load_yaml(self, filename="llm_config.yaml"):
         yaml_path = self.base_path / filename
