@@ -1,0 +1,22 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# --- Visual Studio Code ---
+.vscode/
+*.code-workspace
+
+# --- File di sistema (opzionale ma consigliato) ---
+.DS_Store
+Thumbs.db
+
+# mie cartelle
+data\ examples/
+
+# api keys
+Scripts/AIM/llm/api_key.txt
+.env
