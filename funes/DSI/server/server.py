@@ -4,16 +4,15 @@ import uuid
 from datetime import datetime
 import os
 import sys
-# Inserisci i percorsi dei moduli
 
-sys.path.insert(0, str(str(Path(__file__).resolve().parent.parent.parent)))  # insert all'inizio del path
 
 
 # Import PlanningLLM e XMLPlanningCleaner (Windows)
-from Scripts.AIM.llm.LLM.planning_LLM import PlanningLLM
-from Storage.StorageManager import StorageManager
-from utils.utils import print_json
-from Scripts.AIM.config.config_loader import ConfigLoader
+from funes.AIM.llm.LLM.planning_llm import PlanningLLM
+from funes.Storage.StorageManager import StorageManager
+from funes.utils.utils import print_json
+from funes.AIM.config.config_loader import ConfigLoader
+from funes.AIM.llm.provider.groq_provider import GroqProvider
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key_change_me"
@@ -30,8 +29,9 @@ my_data = {
     "soe": ""  # Aggiungi dati di sequence of events se disponibili
 }
 
-print_json(my_data['planning_data'])
-print_json(my_data['satellite_passages'])
+# inizializzazione config loader
+config_loader = ConfigLoader()
+
 
 # --- ROTTE FLASK --- #
 
@@ -41,14 +41,14 @@ def index():
 
 
 def get_planner_response(chat_id, user_message=None):
-    planner = active_chats.get(chat_id)
-    if not planner:
+    planner_llm = active_chats.get(chat_id)
+    if not planner_llm:
         raise ValueError(f"No planner loaded for chat_id {chat_id}")
 
     if user_message:
-        planner.add_user_response(user_message)
+        planner_llm.add_user_message(user_message)
 
-    chatbot_response = planner.speak()
+    chatbot_response = planner_llm.speak(my_data)
     return chatbot_response
 
 
@@ -61,12 +61,13 @@ def chat_start():
     chat_id = session["chat_id"]
 
     # crea e carica dati nel PlanningLLM
-    provider = GroqProvider(api_key=os.getenv("GROQ_API_KEY"))
-    planner = PlanningLLM(model_name=provider.model_small_name, prompts={}) #)
-    planner.load_data(my_data)
-    active_chats[chat_id] = planner
+    planning_llm_prompts = config_loader.load_yaml("llm_config.yaml")
 
-    return jsonify({"robot": "Come posso aiutarti?", "chat_id": chat_id})
+    provider = GroqProvider(api_key=os.environ.get("GROQ_API_KEY"))
+    planner_llm = PlanningLLM(model_name=provider.model_small_name, prompts=planning_llm_prompts, provider=provider)
+    active_chats[chat_id] = planner_llm
+
+    return jsonify({"robot": "Benvenuto! Come posso aiutarti?", "chat_id": chat_id})
 
 
 @app.route("/chat/send_message", methods=["POST"])
@@ -85,10 +86,10 @@ def chat_send_message():
 @app.route("/chat/exit", methods=["POST"])
 def chat_exit():
     chat_id = session.get("chat_id")
-    planner = active_chats.pop(chat_id, None)
+    planner_llm = active_chats.pop(chat_id, None)
     session.clear()
-    if planner:
-        file_path = planner.export_conversation()
+    if planner_llm:
+        file_path = planner_llm.export_conversation()
         return jsonify({"link": file_path})
     return jsonify({"link": None})
 

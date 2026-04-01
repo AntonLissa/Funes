@@ -1,6 +1,6 @@
 # providers/groq_provider.py
 import requests, time
-from provider import BaseProvider
+from funes.AIM.llm.provider.base_provider import BaseProvider
 
 class GroqProvider(BaseProvider):
     def __init__(self, api_key: str):

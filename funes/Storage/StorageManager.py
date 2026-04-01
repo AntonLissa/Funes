@@ -6,13 +6,10 @@ time_tagged_data = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data e
 cmp_data = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\INPUT\IME01_PL_PPF_CMP_20260311T133622_20260318T000000_20260320T000000_DEV_001.xml"
 orbit = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\INPUT\IME01_CTBL_20260316T000000_20260321T000000_001.json"
 
-
-from pathlib import Path
 import json
-import sys
-sys.path.insert(0, str(str(Path(__file__).resolve().parent.parent)))  # insert all'inizio del path
+from funes.utils.planning_correlator import get_csv_task_plan
 
-from utils.planning_correlator import get_csv_task_plan
+
 class StorageManager:
     def __init__(self):
         self.storage = {}
@@ -20,12 +17,12 @@ class StorageManager:
 
 
     def get_planning_data(self):
-        task_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\TASK_PLAN_NOMINAL_20260318.csv"
+        task_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\TASK_PLAN_NOMINAL_20260318.csv"
     
         return get_csv_task_plan(task_path, date_start="2026-03-18", date_end="2026-03-19", acquisition_filter=True)
 
     def get_orbit_from_json(self):
-        json_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\INPUT\IME01_CTBL_20260316T000000_20260321T000000_001.json"
+        json_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\INPUT\IME01_CTBL_20260316T000000_20260321T000000_001.json"
         with open(json_path, 'r') as f:
             data = json.load(f)
         return json.dumps(data, default=str, separators=(",", ":")) 

@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 
-from funes.AIM.llm.provider.provider import Provider
+from funes.AIM.llm.provider.base_provider import BaseProvider
 
 class BaseLLM(ABC):
 
-    def __init__(self, model_name, system_prompt, user_prompt, provider:Provider):
+    def __init__(self, model_name, system_prompt, user_prompt, provider:BaseProvider):
         self.model_name = model_name
         self.system_prompt = system_prompt
         self.user_prompt = user_prompt
@@ -27,8 +27,8 @@ class BaseLLM(ABC):
 
         response = self.provider.call(
             model_name=self.model_name,
-            system_prompt_template=self.system_prompt,
-            user_prompt_template=prompt,
+            system_prompt=self.system_prompt,
+            user_prompt=prompt,
             temperature=0
         )
 
