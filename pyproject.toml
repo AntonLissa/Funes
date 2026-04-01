@@ -1,0 +1,12 @@
+[project]
+name = "funes"
+version = "0.1.0"
+dependencies = [
+    "flask",
+    "requests",
+    "pyyaml"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

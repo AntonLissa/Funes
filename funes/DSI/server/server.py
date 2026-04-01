@@ -10,10 +10,10 @@ sys.path.insert(0, str(str(Path(__file__).resolve().parent.parent.parent)))  # i
 
 
 # Import PlanningLLM e XMLPlanningCleaner (Windows)
-from AIM.llm.planning_LLM import PlanningLLM
+from Scripts.AIM.llm.LLM.planning_LLM import PlanningLLM
 from Storage.StorageManager import StorageManager
 from utils.utils import print_json
-
+from Scripts.AIM.config.config_loader import ConfigLoader
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key_change_me"
@@ -48,8 +48,8 @@ def get_planner_response(chat_id, user_message=None):
     if user_message:
         planner.add_user_response(user_message)
 
-    robot_response = planner.speak()
-    return robot_response
+    chatbot_response = planner.speak()
+    return chatbot_response
 
 
 @app.route("/chat/start")
@@ -61,11 +61,12 @@ def chat_start():
     chat_id = session["chat_id"]
 
     # crea e carica dati nel PlanningLLM
-    planner = PlanningLLM(model_name='llama-3.3-70b-versatile') #)
+    provider = GroqProvider(api_key=os.getenv("GROQ_API_KEY"))
+    planner = PlanningLLM(model_name=provider.model_small_name, prompts={}) #)
     planner.load_data(my_data)
     active_chats[chat_id] = planner
 
-    return jsonify({"robot": "Welcome back!", "robot_audio": None, "chat_id": chat_id})
+    return jsonify({"robot": "Come posso aiutarti?", "chat_id": chat_id})
 
 
 @app.route("/chat/send_message", methods=["POST"])
@@ -78,7 +79,7 @@ def chat_send_message():
     user_message = data.get("message", "")
 
     robot_message = get_planner_response(chat_id, user_message)
-    return jsonify({"child": user_message, "robot": robot_message, "robot_audio": None})
+    return jsonify({"child": user_message, "robot": robot_message})
 
 
 @app.route("/chat/exit", methods=["POST"])

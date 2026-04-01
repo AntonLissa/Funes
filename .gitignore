@@ -15,7 +15,7 @@ env/
 Thumbs.db
 
 # mie cartelle
-data\ examples/
+data_examples/
 
 # api keys
 Scripts/AIM/llm/api_key.txt

@@ -6,6 +6,9 @@ class GroqProvider(BaseProvider):
     def __init__(self, api_key: str):
         self.api_key = api_key
         self.url = "https://api.groq.com/openai/v1/chat/completions"
+        self.model_small_name = 'llama-3.1-8b-instant'
+        self.model_large_name = 'llama-3.3-70b-versatile'
+    
 
     def call(self, model_name, system_prompt, user_prompt, temperature=0):
             headers = {"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"}
