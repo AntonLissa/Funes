@@ -4,7 +4,8 @@ from funes.AIM.llm.provider.base_provider import BaseProvider
 
 class BaseLLM(ABC):
 
-    def __init__(self, model_name, system_prompt, user_prompt, provider:BaseProvider):
+    def __init__(self, model_name: str, system_prompt: str, user_prompt: str, provider: BaseProvider):
+        
         self.model_name = model_name
         self.system_prompt = system_prompt
         self.user_prompt = user_prompt

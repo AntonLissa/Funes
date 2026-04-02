@@ -23,3 +23,9 @@ Scripts/AIM/llm/api_key.txt
 
 # egg
 *.egg-info/
+
+__pycache__/
+*.pyc
+.env
+.venv
+.vscode
