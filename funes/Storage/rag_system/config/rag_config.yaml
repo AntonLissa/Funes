@@ -1,0 +1,6 @@
+documents:
+  metadata_knowledge_base_collection:
+    - date
+    - category
+    - subsystem
+    - tags

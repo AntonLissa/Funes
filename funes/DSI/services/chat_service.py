@@ -8,9 +8,11 @@ from funes.DSI.core.chat_session import ChatSession
 
 
 class ChatService:
-    def __init__(self, session_manager, factory):
+    def __init__(self, session_manager, factory, storage):
         self.session_manager = session_manager
         self.factory = factory
+        self.storage = storage
+
 
     def start_chat(self, chat_id, agent_type="planning"):
         agent = self.factory.create_agent(agent_type)

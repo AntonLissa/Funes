@@ -14,3 +14,7 @@ class Memory(ABC):
     @abstractmethod
     def search(self, query):
         pass
+
+    @abstractmethod
+    def get_all(self):
+        pass

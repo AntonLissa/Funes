@@ -12,3 +12,7 @@ class VectorStore(ABC):
     @abstractmethod
     def search(self, embedding, k):
         pass
+
+    @abstractmethod
+    def get_all(self):
+        pass

@@ -11,12 +11,18 @@ Mostra:
 """
 
 from embeddings.sentence_transformer import SentenceTransformerEmbedding
+from funes.Storage.rag_system.chunker.smart_chunker import SmartChunker
 from memory.solution_memory import SolutionMemory
-from memory.document_memory import DocumentMemory
+from funes.Storage.rag_system.memory.knowledge_base_memory import KBMemory
 from vector_store.vector_store import VectorStore
 from vector_store.chroma_store import ChromaStore
 from retrieval.simple_retriever import SimpleRetriever
 from retrieval.context_builder import ContextBuilder
+
+
+test_string = """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse maximus semper libero varius porta. Morbi metus massa, rhoncus a sem bibendum, auctor pellentesque ex. Aliquam efficitur dui at eros convallis pellentesque. Praesent ullamcorper mauris orci, quis bibendum tellus fringilla ut. Integer a sodales est, lacinia tempor mauris. Etiam sit amet magna ac ipsum placerat lacinia. Aenean nec semper dui, ut imperdiet diam. Fusce ut mauris maximus, tempor nunc id, euismod ex. In ornare imperdiet erat euismod congue. Proin ac ante vel nisi mollis ultricies. Mauris lacinia pulvinar dui. Nam tristique sagittis ex, eget pulvinar justo auctor vel. Suspendisse pretium metus eu libero lacinia accumsan. Aenean feugiat enim purus, vestibulum fermentum risus blandit vitae.
+
+Curabitur convallis finibus fringilla. Cras vel diam sagittis, condimentum lorem vel, consectetur velit. Sed ullamcorper, turpis quis dignissim sollicitudin, felis erat laoreet sapien, dignissim fringilla orci quam in nisi. Pellentesque sit amet facilisis nulla, in scelerisque lorem. Morbi lacus turpis, feugiat vitae leo sit amet, rutrum viverra mi. Donec condimentum, magna rutrum malesuada tincidunt, est justo rutrum augue, eget elementum neque tellus quis diam. Proin mollis sagittis odio id fermentum. Ut vel cursus odio. Maecenas luctus ultricies justo, ut pharetra ex aliquam eu. Etiam aliquam pharetra est vel accumsan. Integer tristique nec purus sit amet tincidunt. Vivamus porttitor dolor id ante suscipit blandit. Donec volutpat erat vitae metus condimentum, eu faucibus ex scelerisque. Aliquam sagittis, urna vitae imperdiet imperdiet, leo felis aliquam ipsum, nec sagittis lacus justo sed augue."""
 
 
 # --- 1. Configurazione Embedding ---
@@ -24,112 +30,21 @@ from retrieval.context_builder import ContextBuilder
 embedder = SentenceTransformerEmbedding()
 
 
-# --- 2. Configurazione VectorStore ---
-# Qui useremo Chroma come DB vettoriale mockup
-solution_store = ChromaStore(collection_name="solution_collection")
-document_store = ChromaStore(collection_name="document_collection")
+# --- 2. Configurazione Store ---
+kb_collection = ChromaStore(collection_name="knowledge_base_collection")
 
 
 # --- 3. Creazione memorie ---
 # SolutionMemory: salva problemi e soluzioni
-solution_memory = SolutionMemory(store=solution_store, embedder=embedder)
-
-# DocumentMemory: salva documenti generici
-document_memory = DocumentMemory(store=document_store, embedder=embedder)
-
+chunker = SmartChunker()
+kb_memory = KBMemory(store=kb_collection, embedder=embedder, chunker=chunker)
 
 # --- 4. Popolamento delle memorie ---
-solution_memory.add(
-    problem="""
-CI/CD pipeline fails during deploy stage with error:
-'Missing required environment variable: APP_ENV'.
-The issue appears only in the production workflow on GitHub Actions,
-while staging works correctly. Logs show that the container starts
-but the configuration loader crashes before initialization.
-""",
-    solution="""
-Ensure that the APP_ENV variable is explicitly defined in the production
-deployment step. In GitHub Actions add it under 'env' or pass it through
-the deployment script. Example:
-
-env:
-  APP_ENV: production
-
-Also verify that the Dockerfile does not override it with a default value.
-"""
-)
-
-solution_memory.add(
-    problem="""
-Application intermittently fails to connect to PostgreSQL with timeout errors.
-Stack trace indicates connection pool exhaustion and occasional DNS resolution
-failures. The issue started after migrating the service to Kubernetes and
-deploying multiple replicas.
-""",
-    solution="""
-Check the database connection pool configuration and ensure that the max
-connections allowed by PostgreSQL are not exceeded. Reduce pool size per pod
-or introduce a connection proxy (e.g., PgBouncer).
-
-Additionally verify Kubernetes DNS stability and ensure the DB hostname
-resolves correctly inside the cluster.
-"""
-)
-
-solution_memory.add(
-    problem="""
-API requests to the authentication service return HTTP 401 even with valid
-JWT tokens. The tokens appear correct when decoded but the service logs
-show 'invalid signature'. The problem appeared after rotating signing keys.
-""",
-    solution="""
-Ensure the authentication service is using the updated public key for JWT
-verification. If keys are fetched from a JWKS endpoint, verify the cache
-expiration and force a refresh. Restart the service or clear the key cache
-to ensure the new signing key is loaded.
-"""
+kb_memory.add(
+    doc_id="doc_1",
+    text=test_string,
+    metadata={"category": "test", "subsystem": "test"}
 )
 
 
-
-# --- 5. Configurazione Retriever ---
-# Il retriever interroga tutte le memorie e restituisce risultati semantici
-memories = [solution_memory, document_memory]
-retriever = SimpleRetriever(memories=memories, top_k=1)
-
-
-# --- 6. Configurazione ContextBuilder ---
-# Costruisce il contesto da passare a un LLM
-context_builder = ContextBuilder()
-
-
-# --- 7. Funzione di test chatbot ---
-def test_chatbot(query: str):
-    """
-    Simula il flusso di un chatbot RAG:
-    1. Retrieval dai vari tipi di memoria
-    2. Costruzione contesto
-    3. (Qui non c'è LLM, stampiamo il contesto)
-    """
-    print(f"\n--- User query ---\n{query}\n")
-
-    # Step 1: Retrieval dai diversi tipi di memoria
-    retrieved_items = retriever.retrieve(query)
-
-    # Step 2: Costruzione del contesto
-    context = context_builder.build(retrieved_items)
-
-    # Step 3: Mostriamo il contesto che verrebbe passato all'LLM
-    print("--- Retrieved Context ---")
-    print(context)
-
-
-# --- 8. Test delle query ---
-# Query che dovrebbe richiamare sia SolutionMemory che DocumentMemory
-test_chatbot("Cosa devo fare se la pipeline fallisce perché manca una variabile?")
-
-# Query che richiama DocumentMemory
-test_chatbot("Come faccio il backup giornaliero del database?")
-
-# Query che richiama SolutionMemory
-test_chatbot("Database connection timeout error")
+print(kb_memory.get_all())

@@ -21,11 +21,9 @@ class ChromaStore(VectorStore):
 
         # inizializzazione client
         if persist_path:
-            self.client = chromadb.Client(
-                Settings(persist_directory=persist_path)
-            )
+            self.client = chromadb.PersistentClient(path=persist_path)
         else:
-            self.client = chromadb.Client()
+            self.client = chromadb.EphemeralClient()
 
         # otteniamo o creiamo la collection
         self.collection = self.client.get_or_create_collection(
@@ -37,16 +35,9 @@ class ChromaStore(VectorStore):
         Aggiunge documenti alla collection.
         """
 
-        # genera id se mancanti
-        final_ids = []
-        for i in range(len(documents)):
-            if ids and ids[i]:
-                final_ids.append(ids[i])
-            else:
-                final_ids.append(str(uuid.uuid4()))
-
+        
         self.collection.add(
-            ids=final_ids,
+            ids=ids,
             documents=documents,
             embeddings=embeddings,
             metadatas=metadata
@@ -91,3 +82,27 @@ class ChromaStore(VectorStore):
         self.collection = self.client.get_or_create_collection(
             name=self.collection_name
         )
+    
+    def get_all(self):
+        """
+        Ritorna tutti i documenti presenti nella collection.
+        Utile per debug o per costruire un indice completo.
+        """
+
+        results = self.collection.get()
+
+        docs = results.get("documents", [])
+        metas = results.get("metadatas", [])
+        ids = results.get("ids", [])
+
+        items = []
+
+        for doc, meta, id in zip(docs, metas, ids):
+
+            items.append({
+                "id": id,
+                "text": doc,
+                "metadata": meta
+            })
+
+        return items

@@ -9,6 +9,7 @@ from funes.DSI.core.session_manager import SessionManager
 from funes.DSI.services.chat_service import ChatService
 import funes.AIM.core.register_agents 
 from funes.AIM.core.agent_registry import registry
+from funes.Storage import StorageManager
 
 chat_bp = Blueprint("chat", __name__, template_folder="templates")
 
@@ -18,7 +19,8 @@ provider = GroqProvider(config_loader.load_api_key())
 factory = AgentFactory(registry=registry, config_loader=config_loader, provider=provider)
 
 session_manager = SessionManager()
-chat_service = ChatService(session_manager, factory)
+storage_manager = StorageManager()
+chat_service = ChatService(session_manager, factory, storage_manager)
 
 
 @chat_bp.route("/")
