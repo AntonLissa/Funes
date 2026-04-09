@@ -16,6 +16,7 @@ Thumbs.db
 
 # mie cartelle
 data_examples/
+funes/Storage/saved_data/
 
 # api keys
 Scripts/AIM/llm/api_key.txt
