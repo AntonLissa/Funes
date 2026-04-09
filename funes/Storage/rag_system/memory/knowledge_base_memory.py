@@ -32,7 +32,7 @@ class KBMemory(Memory):
         for chunk in chunks:
             if chunk.metadata['content_hash'] not in existing_hashes:
                 new_chunks.append(chunk)
-                print(f"KBMEMORY: Nuovo chunk da aggiungere (hash {chunk.metadata['chunk_id']})")
+                #print(f"KBMEMORY: Nuovo chunk da aggiungere (hash {chunk.metadata['chunk_id']})")
 
         if not new_chunks:
             print("KBMEMORY: Nessun chunk nuovo da aggiungere.")

@@ -1,4 +1,4 @@
-from vector_store.vector_store import VectorStore
+from funes.Storage.rag_system.vector_store.vector_store import VectorStore
 import chromadb
 from chromadb.config import Settings
 import uuid
@@ -123,3 +123,12 @@ class ChromaStore(VectorStore):
             })
 
         return items
+
+
+if __name__ == "__main__":
+    # test rapido
+    kb_collection = ChromaStore(collection_name="knowledge_base_collection", persist_path="saved_data/chroma_kb")
+    all_data = kb_collection.get_all()
+    all_titles = set([item['metadata']['title'] for item in all_data])
+    for elem in all_titles:
+        print(elem)

@@ -1,4 +1,5 @@
 import hashlib
+import os
 
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -19,7 +20,7 @@ from langchain_community.document_loaders import (
 from unstructured.partition.pdf import partition_pdf
 import fitz
 import pymupdf4llm
-
+from funes.utils.utils import get_repetitive_patterns, similar
 
 class LocalSemanticChunker(BaseChunker):
     def __init__(self):
@@ -63,44 +64,68 @@ class LocalSemanticChunker(BaseChunker):
         doc.close()
         return metadata
     
-    def chunk(self, file_path: str) -> List[Document]:
-    
 
-        print("- smart chunker: loading document and extracting metadata...")
+    def chunk(self, file_path: str, sample_n: int = 10):
+        print("- SEMANTIC CHUNKER: initializing metadata and sampling...")
         doc_info = self.get_pdf_info(file_path)
-
         source_name = Path(file_path).name
         doc_hash = hashlib.md5(source_name.encode()).hexdigest()[:8]
 
-        print("- smart chunker: extracting pages with PyMuPDF4LLM...")
-        raw_pages = pymupdf4llm.to_markdown(file_path, page_chunks=True)
+        # 1. FASE DI CAMPIONAMENTO (per trovare header/footer)
+        # Estraiamo le pagine necessarie per il confronto
+        all_raw_pages = pymupdf4llm.to_markdown(file_path, page_chunks=True)
+        
+        # Gestiamo il caso in cui il documento sia più corto del campione
+        sample_limit = min(sample_n, len(all_raw_pages))
+        sample_pages_text = [p["text"] for p in all_raw_pages[:sample_limit]]
+        
+        print(f"- SEMANTIC CHUNKER: scanning first {sample_limit} pages for noise...")
+        # Troviamo i pattern ripetitivi usando la tua funzione logica
+        # Nota: passiamo solo i testi, non i Document
+        repetitive_patterns = get_repetitive_patterns(sample_pages_text) 
 
-        docs_to_clean = [
-            Document(page_content=p["text"], metadata={"page": p.get("page", i + 1)})
-            for i, p in enumerate(raw_pages)
-        ]
+        print(f"- SEMANTIC CHUNKER: processing full document...")
 
-        cleaned_docs = clean_documents(docs_to_clean)
+        # 2. FASE DI GENERAZIONE
+        for i, p in enumerate(all_raw_pages):
+            page_num = p.get("page", i + 1)
+            raw_text = p["text"]
 
-        final_chunks = []
+            # Applichiamo la rimozione dei pattern ripetitivi alla pagina corrente
+            lines = raw_text.splitlines()
+            cleaned_lines = []
+            for line in lines:
+                line_s = line.strip()
+                # Se la linea è simile a uno dei pattern trovati, la scartiamo
+                if any(similar(line_s, p_rep) >= 0.95 for p_rep in repetitive_patterns):
+                    continue
+                cleaned_lines.append(line)
+            
+            clean_page_text = "\n".join(cleaned_lines)
 
-        for doc in cleaned_docs:
-            page_num = doc.metadata.get("page", -1)
+            # Integriamo con la tua funzione clean_documents per la pulizia finale (spazi, etc)
+            temp_doc = Document(page_content=clean_page_text, metadata={"page": page_num})
+            final_clean_docs = clean_documents([temp_doc])
+            
+            if not final_clean_docs:
+                continue
+                
+            page_text_for_splitting = final_clean_docs[0].page_content
 
-            page_chunks = self.splitter.split_text(doc.page_content)
+            # 3. SPLITTING SEMANTICO
+            page_chunks = self.splitter.split_text(page_text_for_splitting)
 
-            for i, chunk_text in enumerate(page_chunks):
+            for j, chunk_text in enumerate(page_chunks):
                 text = chunk_text.strip()
 
                 if len(text) < 50 or len(text.split()) < 8:
                     continue
 
                 normalized = " ".join(text.split())
-
                 content_hash = hashlib.sha1(normalized.encode()).hexdigest()
+                chunk_id = f"{doc_hash}_p{page_num}_c{j+1}"
 
-                chunk_id = f"{doc_hash}_p{page_num}_c{i+1}"
-
+                # Tutti i tuoi metadati preservati
                 metadata = {
                     "chunk_id": chunk_id,
                     "content_hash": content_hash,
@@ -109,42 +134,34 @@ class LocalSemanticChunker(BaseChunker):
                     "author": doc_info.get("author") or "N/A",
                     "last_modified": doc_info.get("modDate") or "N/A",
                     "page_number": page_num,
-                    "chunk_index_in_page": i + 1,
+                    "chunk_index_in_page": j + 1,
                     "chunk_size": len(text),
                     "format": "markdown"
                 }
 
-                final_chunks.append(
-                    Document(page_content=text, metadata=metadata)
-                )
-
-        return final_chunks
-
-                
+                yield Document(page_content=text, metadata=metadata)       
 
 
 if __name__ == "__main__":
     # Inizializza il nuovo chunker semantico
     # Nota: la prima volta scaricherà il modello (~100MB), sii paziente.
+    os.environ["TRANSFORMERS_VERBOSITY"] = "error"
     chunker = LocalSemanticChunker() 
     
     # Path del file (usa le raw string r"" per i path di Windows per evitare errori con i backslash)
     path_file = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\documenti\Annex 2 – FOS Architecture.pdf"
     
-    # Chiamata al metodo chunk
-    # Assicurati che nella classe il metodo si chiami 'chunk' e non 'chunk_file'
-    chunks = chunker.chunk(path_file)
-
-    print(f"\n--- Elaborazione completata: {len(chunks)} chunk generati ---\n")
-
-    for c in chunks: 
-        # Recuperiamo i metadata con dei fallback (None o "N/A") per evitare errori di stampa
-        title = c.metadata.get('title', 'Unknown Title')
-        author = c.metadata.get('author', 'Unknown Author')
+    count = 0
+    # Iteriamo direttamente sul generatore
+    for c in chunker.chunk(path_file):
+        count += 1
         chunk_id = c.metadata.get('chunk_id')
         size = c.metadata.get('chunk_size')
-        date = c.metadata.get('last_modified', 'Unknown Date')
+
+        print("title:", c.metadata.get('title'))
         
-        print(f"Title: {title} | ID: {chunk_id} | Author: {author} | Date: {date} |Size: {size} chars")
-        print(c.page_content) # Stampo solo l'inizio per non intasare la console
-        print("-" * 50)
+        # Stampiamo un feedback rapido per ogni chunk prodotto
+        #print(f"Generato Chunk {count} | ID: {chunk_id} | Size: {size} chars | Content: {c.page_content[:100]}...{c.page_content[-100:]}")
+        
+        # Se vuoi vedere il testo (solo primi 100 caratteri per non intasare):
+        # print(f"Content: {c.page_content[:100]}...")

@@ -78,7 +78,26 @@ def clean_documents(docs: List[Document]) -> List[Document]:
         for doc, text in zip(docs, cleaned_pages):
             cleaned_docs.append(Document(page_content=text, metadata=doc.metadata))
         return cleaned_docs
+def get_repetitive_patterns(pages: List[str], similarity_threshold: float = 0.95) -> set:
+    """
+    Analizza un gruppo di pagine per trovare blocchi che si ripetono.
+    """
+    repetitive_patterns = set()
+    page_blocks = [page.splitlines() for page in pages]
 
+    for i, blocks_i in enumerate(page_blocks):
+        for block in blocks_i:
+            block_clean = block.strip()
+            if not block_clean or len(block_clean) < 10: # Evita di eliminare linee troppo corte
+                continue
+
+            # Confronta con le altre pagine nel campione
+            for j, blocks_j in enumerate(page_blocks):
+                if i == j: continue
+                if any(similar(block_clean, b.strip()) >= similarity_threshold for b in blocks_j):
+                    repetitive_patterns.add(block_clean)
+                    break
+    return repetitive_patterns
 
 def normalize_text(text):
     text = text.lower()

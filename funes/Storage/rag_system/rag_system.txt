@@ -1,5 +1,0 @@
-Vogliamo salvare:
-- conversazioni -> chat_history collection
-- documenti operativi -> knowledge_base collection
-- soluzioni, appunti, memo -> long_term_memory collection
-

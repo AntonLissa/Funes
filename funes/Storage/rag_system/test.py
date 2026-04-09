@@ -16,6 +16,16 @@ from funes.Storage.rag_system.memory.knowledge_base_memory import KBMemory
 from vector_store.chroma_store import ChromaStore
 from retrieval.simple_retriever import SimpleRetriever
 
+import os
+
+def get_file_paths(folder_path):
+    file_paths = []
+    
+    for root, dirs, files in os.walk(folder_path):
+        for file in files:
+            file_paths.append(os.path.join(root, file))
+    
+    return file_paths
 
 # --- 1. Configurazione Embedding ---
 # L'embedding model trasforma testi in vettori numerici per similarity search
@@ -32,19 +42,16 @@ chunker = LocalSemanticChunker()
 kb_memory = KBMemory(store=kb_collection, embedder=embedder, chunker=chunker)
 
 # --- 4. Popolamento delle memorie ---
-path_file = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\documenti\Annex 2 – FOS Architecture.pdf"
-#kb_memory.add(path_file)
 
-
+for path in get_file_paths(r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\documenti"):
+    print(f"\n--- Aggiungo documento alla KB: {path} ---")
+    kb_memory.add(path)
 all_data = kb_collection.get_all()
 
-print(f"Total chunks in KB: {len(all_data)}")
-print("Sample chunk metadata:")
-for elem in all_data:
-    print(f"Metadata: {elem['text']}")
-    print("-"*50)
+print("-"*10, f"Total chunks in KB: {len(all_data)}", "-"*10)
 
-result = kb_memory.search("What is the moc?", k=3)
-print("\n\nRAG Search Results:")
-for i, res in enumerate(result):
-    print(f" [SCORE: {res['score']:.2f}]\n{res['text']} \n", "_"*50)
+while True:
+    result = kb_memory.search(input(">> Inserisci ricerca:"), k=3)
+    print("\n\nRAG Search Results:")
+    for i, res in enumerate(result):
+        print(f" [SCORE: {res['score']:.2f}] Title:{res['metadata']['title']} Page: {res['metadata']['page_number']} \n{res['text']} \n", "_"*50)
