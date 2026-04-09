@@ -1,217 +1,491 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Funes - Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Funes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Mulish:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
   <style>
+
+    [data-theme="dark"] {
+      --page-bg:         #0c0709;
+      --header-bg:       rgba(12,7,9,0.90);
+      --footer-bg:       rgba(12,7,9,0.94);
+      --border:          rgba(220,50,70,0.09);
+      --border-strong:   rgba(220,50,70,0.22);
+      --them-bg:         #220c10;
+      --them-border:     rgba(200,40,60,0.16);
+      --them-color:      #ffd6db;
+      --them-shadow:     0 2px 18px rgba(160,20,40,0.12);
+      --me-bg:           #8a0f20;
+      --me-border:       rgba(60,0,12,0.30);
+      --me-color:        #fff0f2;
+      --me-shadow:       0 4px 22px rgba(140,10,28,0.30);
+      --label-color:     rgba(255,160,180,0.30);
+      --input-bg:        rgba(255,40,60,0.05);
+      --input-border:    rgba(220,50,70,0.13);
+      --input-focus:     rgba(220,50,70,0.34);
+      --input-color:     #ffd6db;
+      --placeholder:     rgba(255,180,190,0.28);
+      --send-bg:         #b81428;
+      --send-glow:       rgba(180,20,40,0.40);
+      --send-glow-h:     rgba(180,20,40,0.60);
+      --send-color:      #fff0f2;
+      --title-color:     #ffe0e4;
+      --sub-color:       rgba(255,200,210,0.46);
+      --sep-color:       rgba(255,160,180,0.22);
+      --sep-line:        rgba(220,50,70,0.08);
+      --dot-bg:          #ff5060;
+      --dot-glow:        rgba(255,80,96,0.50);
+      --toggle-bg:       rgba(220,50,70,0.08);
+      --toggle-hover:    rgba(220,50,70,0.18);
+      --toggle-color:    #ff6070;
+      --exit-color:      rgba(255,180,190,0.40);
+      --exit-hover-bg:   rgba(220,50,70,0.12);
+      --exit-hover-color:#ff6070;
+      --scrollbar:       rgba(200,30,50,0.22);
+      --bubble-max:      62%;
+      --date-sep:        rgba(255, 255, 255, 0.954);
+    }
+
+    [data-theme="light"] {
+      --page-bg:         #fef6f6;
+      --header-bg:       rgba(254,246,246,0.88);
+      --footer-bg:       rgba(254,246,246,0.92);
+      --border:          rgba(180,30,50,0.10);
+      --border-strong:   rgba(180,30,50,0.24);
+      --them-bg:         #ffffff;
+      --them-border:     rgba(160,20,40,0.12);
+      --them-color:      #2a0810;
+      --them-shadow:     0 2px 14px rgba(160,20,40,0.07);
+      --me-bg:           #b81428;
+      --me-border:       rgba(100,0,16,0.16);
+      --me-color:        #fff5f5;
+      --me-shadow:       0 4px 20px rgba(150,10,30,0.22);
+      --label-color:     rgba(80,10,20,0.35);
+      --input-bg:        #ffffff;
+      --input-border:    rgba(160,20,40,0.16);
+      --input-focus:     rgba(160,20,40,0.36);
+      --input-color:     #2a0810;
+      --placeholder:     rgba(80,10,20,0.30);
+      --send-bg:         #b81428;
+      --send-glow:       rgba(160,10,30,0.28);
+      --send-glow-h:     rgba(160,10,30,0.46);
+      --send-color:      #fff5f5;
+      --title-color:     #1a0608;
+      --sub-color:       rgba(60,10,18,0.48);
+      --sep-color:       rgba(60,10,18,0.22);
+      --sep-line:        rgba(160,20,40,0.08);
+      --dot-bg:          #b81428;
+      --dot-glow:        rgba(184,20,40,0.45);
+      --toggle-bg:       rgba(160,20,40,0.07);
+      --toggle-hover:    rgba(160,20,40,0.14);
+      --toggle-color:    #b81428;
+      --exit-color:      rgba(60,10,18,0.42);
+      --exit-hover-bg:   rgba(184,20,40,0.08);
+      --exit-hover-color:#b81428;
+      --scrollbar:       rgba(160,20,40,0.15);
+      --bubble-max:      62%;
+      --date-sep:        rgba(60,10,18,0.28);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; height: -webkit-fill-available; }
+
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #a2d2ff, #cdb4db);
+      font-family: 'Mulish', sans-serif;
+      background-color: var(--page-bg);
+      color: var(--title-color);
       display: flex;
       flex-direction: column;
       height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      transition: background-color .4s, color .4s;
     }
 
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 55% 45% at 90% 5%,  rgba(180,20,36,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 40% at 5% 95%,  rgba(140,10,24,0.06) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── HEADER ── */
     header {
-      position: relative;
+      z-index: 20;
+      flex-shrink: 0;
       display: flex;
       align-items: center;
-      padding: 1rem;
-      background: #4a4e69;
-      color: white;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      border-bottom-left-radius: 20px;
-      border-bottom-right-radius: 20px;
+      justify-content: space-between;
+      padding: 0.85rem 1.5rem;
+      background: var(--header-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: background .4s, border-color .4s;
     }
 
-    header h2 {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      margin: 0;
-      font-size: 1.6rem;
-      pointer-events: none;
+    .brand { display: flex; flex-direction: column; gap: 2px; }
+
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      font-weight: 600;
+      color: var(--title-color);
+      letter-spacing: 0.01em;
+      line-height: 1;
+      transition: color .4s;
     }
 
+    .brand-status {
+      display: flex; align-items: center; gap: 5px;
+      font-size: clamp(0.60rem, 1vw, 0.66rem);
+      color: var(--sub-color);
+      letter-spacing: 0.06em;
+      transition: color .4s;
+    }
+
+    .status-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--dot-bg);
+      box-shadow: 0 0 0 3px var(--dot-glow);
+      animation: throb 2.8s ease-in-out infinite;
+      flex-shrink: 0;
+      transition: background .4s, box-shadow .4s;
+    }
+    @keyframes throb {
+      0%,100% { box-shadow: 0 0 0 3px var(--dot-glow); }
+      50%      { box-shadow: 0 0 0 5px transparent; }
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+
+    .icon-btn {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--toggle-bg);
+      color: var(--toggle-color);
+      font-size: 13px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .2s, border-color .2s, color .4s, transform .15s;
+    }
+    .icon-btn:hover  { background: var(--toggle-hover); border-color: var(--border-strong); transform: scale(1.08); }
+    .icon-btn:active { transform: scale(0.93); }
+
+    .exit-btn {
+      font-family: 'Mulish', sans-serif;
+      font-size: clamp(0.70rem, 1vw, 0.75rem);
+      font-weight: 400; letter-spacing: 0.04em;
+      padding: 0.45rem clamp(0.8rem, 1.5vw, 1.1rem);
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--exit-color);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .exit-btn:hover { background: var(--exit-hover-bg); border-color: var(--border-strong); color: var(--exit-hover-color); }
+
+    /* ── CHAT BOX ── */
     .chat-box {
       flex: 1;
-      padding: 1rem;
+      min-height: 0;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      /* On desktop messages sit in a comfortable column with more side padding */
+      padding: clamp(1.2rem, 3vw, 2.2rem) clamp(1rem, 5vw, 4rem) 0.8rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem; 
-    }
-
-    .message {
-      max-width: 70%;
-      padding: 0.8rem;
-      border-radius: 12px;
-    }
-
-    .child {
-      background: #00d290;
-      align-self: flex-end;
-      color: #000000;
-    }
-
-    .robot {
-      background: #32b0fe;
-      color: #000000;
-      align-self: flex-start;
-    }
-
-    .input-area {
-      display: flex;
-      padding: 0.8rem;
-      background: transparent;
-      border-top: 1px solid #ccc;
-      justify-content: center;
       gap: 0.5rem;
-      border-radius: 1%;
-      border: 1px solid black;
+      position: relative; z-index: 1;
+      scroll-behavior: smooth;
+    }
+    .chat-box::-webkit-scrollbar { width: 3px; }
+    .chat-box::-webkit-scrollbar-track { background: transparent; }
+    .chat-box::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
+
+    /* on wide screens messages don't stretch past a readable line-length */
+    .messages-inner {
+      width: 100%;
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    /* date sep */
+    .date-sep {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--sep-color);
+      font-size: 0.64rem; letter-spacing: 0.10em; text-transform: uppercase;
+      margin: 0.3rem 0 0.6rem;
+      transition: color .4s;
+    }
+    .date-sep::before, .date-sep::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--sep-line); transition: background .4s;
+    }
+
+    /* rows */
+    .message-row {
+      display: flex; flex-direction: column;
+      animation: pop-in .28s cubic-bezier(.34,1.5,.64,1) both;
+    }
+    .message-row.them { align-items: flex-start; }
+    .message-row.me   { align-items: flex-end; }
+
+    @keyframes pop-in {
+      from { opacity: 0; transform: translateY(8px) scale(.97); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .sender-label {
+      font-size: 0.62rem; font-weight: 500;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--label-color);
+      margin-bottom: 4px; padding: 0 2px;
+      transition: color .4s;
+    }
+
+    .bubble {
+      max-width: var(--bubble-max);
+      padding: clamp(0.65rem, 1.5vw, 0.85rem) clamp(0.9rem, 2vw, 1.2rem);
+      font-size: clamp(0.84rem, 1.2vw, 0.92rem);
+      font-weight: 300; line-height: 1.7;
+      word-break: break-word;
+    }
+
+    .bubble.them {
+      background: var(--them-bg); border: 1px solid var(--them-border);
+      color: var(--them-color);
+      border-radius: 18px 18px 18px 5px;
+      box-shadow: var(--them-shadow);
+      transition: background .4s, border-color .4s, color .4s, box-shadow .4s;
+    }
+    .bubble.me {
+      background: var(--me-bg); border: 1px solid var(--me-border);
+      color: var(--me-color);
+      border-radius: 18px 18px 5px 18px;
+      box-shadow: var(--me-shadow);
+      transition: background .4s, border-color .4s, color .4s, box-shadow .4s;
+    }
+
+    /* typing */
+    .typing-row {
+      display: flex; flex-direction: column; align-items: flex-start;
+      animation: pop-in .22s ease both;
+    }
+    .typing-bubble {
+      background: var(--them-bg); border: 1px solid var(--them-border);
+      border-radius: 18px 18px 18px 5px;
+      padding: .75rem 1.1rem;
+      display: flex; gap: 5px; align-items: center;
+      box-shadow: var(--them-shadow);
+      transition: background .4s, border-color .4s;
+    }
+    .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--dot-bg); opacity: .45;
+      animation: bdot 1.4s ease-in-out infinite both;
+      transition: background .4s;
+    }
+    .dot:nth-child(2) { animation-delay: .16s; }
+    .dot:nth-child(3) { animation-delay: .32s; }
+    @keyframes bdot {
+      0%,80%,100% { transform: translateY(0); opacity: .38; }
+      40%          { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* ── INPUT BAR ── */
+    .input-bar {
+      z-index: 20; flex-shrink: 0;
+      padding: clamp(0.65rem, 1.5vw, 0.95rem) clamp(1rem, 5vw, 4rem);
+      padding-bottom: max(clamp(0.75rem, 1.5vw, 0.95rem), env(safe-area-inset-bottom));
+      background: var(--footer-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      transition: background .4s, border-color .4s;
+    }
+
+    /* inner wrapper mirrors the messages max-width */
+    .input-inner {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     input[type="text"] {
-      flex: 1;
-      padding: 1rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
+      flex: 1; min-width: 0;
+      padding: clamp(0.72rem, 1.2vw, 0.85rem) clamp(1rem, 2vw, 1.25rem);
+      border-radius: 999px;
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--input-color);
+      font-family: 'Mulish', sans-serif;
+      font-size: max(16px, clamp(0.85rem, 1.2vw, 0.90rem));
+      font-weight: 300; outline: none;
+      transition: border-color .2s, background .4s, color .4s;
     }
+    input[type="text"]::placeholder { color: var(--placeholder); transition: color .4s; }
+    input[type="text"]:focus { border-color: var(--input-focus); }
 
-    button {
-      padding: 0.8rem 1.2rem;
-      border: none;
-      border-radius: 8px;
-      background: #4a4e69;
-      color: white;
-      cursor: pointer;
-      font-size: 1rem;
-      z-index: 3;
+    #sendBtn {
+      width: clamp(38px, 3vw, 44px);
+      height: clamp(38px, 3vw, 44px);
+      flex-shrink: 0; border-radius: 50%; border: none;
+      background: var(--send-bg); color: var(--send-color);
+      font-size: clamp(13px, 1.2vw, 15px); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px var(--send-glow);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .15s, box-shadow .15s, opacity .2s, color .4s;
     }
+    #sendBtn:hover  { transform: scale(1.09); box-shadow: 0 6px 22px var(--send-glow-h); }
+    #sendBtn:active { transform: scale(.93); }
+    #sendBtn:disabled { opacity: .32; cursor: not-allowed; transform: none; box-shadow: none; }
 
-    button:hover {
-      background: #22223b;
+    /* ── RESPONSIVE ── */
+    /* small mobile: bubbles wider */
+    @media (max-width: 480px) {
+      [data-theme="dark"], [data-theme="light"] { --bubble-max: 82%; }
     }
-
-    .typing {
-      display: flex;
-      gap: 5px;
-      padding: 0.8rem;
-      border-radius: 12px;
-      background: #32b0fe;
-      color: #000;
-      align-self: flex-start;
-      width: fit-content;
+    /* tablet */
+    @media (min-width: 481px) and (max-width: 900px) {
+      [data-theme="dark"], [data-theme="light"] { --bubble-max: 70%; }
     }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      background: #fff;
-      border-radius: 50%;
-      animation: blink 1.4s infinite both;
-    }
-
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes blink {
-      0% { opacity: 0.2; transform: translateY(0); }
-      20% { opacity: 1; transform: translateY(-3px); }
-      100% { opacity: 0.2; transform: translateY(0); }
+    /* desktop: bubbles at 55% to leave breathing room in full width */
+    @media (min-width: 901px) {
+      [data-theme="dark"], [data-theme="light"] { --bubble-max: 55%; }
     }
 
   </style>
 </head>
 <body>
+
   <header>
-    <button id="exitBtn">Esci</button>
-    <h2>Funes</h2>
+    <div class="brand">
+      <span class="brand-name">Funes</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="themeToggle" title="Cambia tema">
+        <i class="fas fa-sun" id="themeIcon"></i>
+      </button>
+      <!-- <button class="exit-btn" id="exitBtn">Esci</button> -->
+    </div>
   </header>
 
-  <div class="chat-box" id="chatBox"></div>
-
-  <div class="input-area" id="inputArea">
-    <input type="text" id="childInput" placeholder="Scrivi un messaggio...">
-    <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+  <div class="chat-box" id="chatBox">
+    <div class="messages-inner" id="messagesInner">
+      <div class="date-sep">oggi</div>
+    </div>
   </div>
 
-<script>
-const chatBox = document.getElementById('chatBox');
-let waitingForRobot = false;
+  <div class="input-bar">
+    <div class="input-inner">
+      <input type="text" id="childInput" placeholder="Scrivi un messaggio…" autocomplete="off">
+      <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
 
-// Enter key = send message
-document.getElementById("childInput").addEventListener("keypress", function(e) {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    document.getElementById("sendBtn").click();
-  }
-});
+  <script>
+    const container = document.getElementById('messagesInner');
+    const chatBox   = document.getElementById('chatBox');
+    let waiting = false;
 
-function addMessage(text, sender) {
-  const msg = document.createElement("div"); 
-  msg.classList.add("message", sender);
-  msg.innerText = text;
-  chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
+    const html = document.documentElement;
+    const themeIcon = document.getElementById('themeIcon');
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      themeIcon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+    });
 
-// prima risposta robot
-window.onload = async function() {
-  showTyping();
-  const response = await fetch("/chat/start");
-  const data = await response.json();
-  addMessage(data.robot, "robot");
-  hideTyping();
-}
+    document.getElementById('childInput').addEventListener('keypress', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('sendBtn').click(); }
+    });
 
-// invio messaggio
-document.getElementById("sendBtn").addEventListener("click", async () => {
-  if (waitingForRobot) return;
-  const input = document.getElementById("childInput");
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = "";
-  addMessage(text, "child");
+    function addMessage(text, who) {
+      const row = document.createElement('div');
+      row.className = 'message-row ' + who;
+      const label = document.createElement('div');
+      label.className = 'sender-label';
+      label.textContent = who === 'them' ? 'Funes' : 'Tu';
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble ' + who;
+      bubble.textContent = text;
+      row.appendChild(label);
+      row.appendChild(bubble);
+      container.appendChild(row);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-  waitingForRobot = true;
-  showTyping();
-  const response = await fetch("/chat/send_message", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: text })
-  });
-  const data = await response.json();
-  hideTyping();
-  addMessage(data.robot, "robot");
-  waitingForRobot = false;
-});
+    function showTyping() {
+      const row = document.createElement('div');
+      row.className = 'typing-row';
+      row.id = 'typingIndicator';
+      const label = document.createElement('div');
+      label.className = 'sender-label';
+      label.textContent = 'Funes';
+      const bubble = document.createElement('div');
+      bubble.className = 'typing-bubble';
+      bubble.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+      row.appendChild(label);
+      row.appendChild(bubble);
+      container.appendChild(row);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-// exit chat
-document.getElementById("exitBtn").addEventListener("click", async () => {
-  await fetch("/chat/exit", { method: "POST" });
-  window.location.href = "/";
-});
+    function hideTyping() {
+      const t = document.getElementById('typingIndicator');
+      if (t) t.remove();
+    }
 
-function showTyping() {
-  const typing = document.createElement("div");
-  typing.classList.add("message", "typing");
-  typing.setAttribute("id", "typingIndicator");
-  typing.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
-  chatBox.appendChild(typing);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
+    window.onload = async function () {
+      showTyping();
+      const res  = await fetch('/chat/start');
+      const data = await res.json();
+      hideTyping();
+      addMessage(data.robot, 'them');
+    };
 
-function hideTyping() {
-  const typing = document.getElementById("typingIndicator");
-  if (typing) typing.remove();
-}
-</script>
+    document.getElementById('sendBtn').addEventListener('click', async () => {
+      if (waiting) return;
+      const input = document.getElementById('childInput');
+      const text  = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      addMessage(text, 'me');
+      waiting = true;
+      document.getElementById('sendBtn').disabled = true;
+      showTyping();
+      const res  = await fetch('/chat/send_message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      hideTyping();
+      addMessage(data.robot, 'them');
+      waiting = false;
+      document.getElementById('sendBtn').disabled = false;
+    });
 
+    document.getElementById('exitBtn').addEventListener('click', async () => {
+      await fetch('/chat/exit', { method: 'POST' });
+      window.location.href = '/';
+    });
+  </script>
 </body>
 </html>

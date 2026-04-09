@@ -1,4 +1,5 @@
 import json
+import re
 from langchain_core.documents import Document
 
 def print_json(data):
@@ -77,3 +78,9 @@ def clean_documents(docs: List[Document]) -> List[Document]:
         for doc, text in zip(docs, cleaned_pages):
             cleaned_docs.append(Document(page_content=text, metadata=doc.metadata))
         return cleaned_docs
+
+
+def normalize_text(text):
+    text = text.lower()
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()

@@ -16,3 +16,7 @@ class VectorStore(ABC):
     @abstractmethod
     def get_all(self):
         pass
+
+    @abstractmethod
+    def get_content_hashes(self):
+        pass    

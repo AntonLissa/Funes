@@ -30,6 +30,23 @@ class ChromaStore(VectorStore):
             name=self.collection_name
         )
 
+    def get_content_hashes(self) -> set:
+        """
+        Ritorna l'insieme di tutti i content_hash già presenti nella collection.
+        Utile per deduplicare chunk prima di aggiungere.
+        """
+        results = self.collection.get()
+        metas = results.get("metadatas", [])
+        content_hashes = set()
+
+        for meta in metas:
+            ch = meta.get("content_hash")
+            if ch:
+                content_hashes.add(ch)
+
+        return content_hashes
+
+
     def add(self, ids, documents, embeddings, metadata):
         """
         Aggiunge documenti alla collection.

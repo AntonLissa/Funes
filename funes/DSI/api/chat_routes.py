@@ -19,7 +19,7 @@ provider = GroqProvider(config_loader.load_api_key())
 factory = AgentFactory(registry=registry, config_loader=config_loader, provider=provider)
 
 session_manager = SessionManager()
-storage_manager = StorageManager()
+storage_manager = None #StorageManager()
 chat_service = ChatService(session_manager, factory, storage_manager)
 
 
