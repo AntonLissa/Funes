@@ -22,6 +22,15 @@ class BaseLLM(ABC):
     def build_prompt(self, data):
         pass
 
+    def get_last_user_message(self):
+        for role, msg in reversed(self.session_history):
+            if role == "user":
+                return msg
+        return ""
+
+    def get_recent_history(self, n=2):
+        return self.session_history[-n:]
+
     def speak(self, data):
 
         prompt = self.build_prompt(data)

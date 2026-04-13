@@ -7,7 +7,35 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Mulish:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
+
+    /* Aggiungi queste regole nel tuo <style> */
+.bubble.them ul, .bubble.them ol {
+  margin-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.bubble.them pre {
+  background: rgba(0,0,0,0.3);
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+.bubble.them code {
+  font-family: 'Courier New', Courier, monospace;
+  background: rgba(220,50,70,0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.bubble.them p {
+  margin-bottom: 0.5rem;
+}
+.bubble.them p:last-child {
+  margin-bottom: 0;
+}
 
     [data-theme="dark"] {
       --page-bg:         #0c0709;
@@ -214,7 +242,7 @@
     /* on wide screens messages don't stretch past a readable line-length */
     .messages-inner {
       width: 100%;
-      max-width: 860px;
+      max-width: 80%;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -367,7 +395,7 @@
     }
     /* desktop: bubbles at 55% to leave breathing room in full width */
     @media (min-width: 901px) {
-      [data-theme="dark"], [data-theme="light"] { --bubble-max: 55%; }
+      [data-theme="dark"], [data-theme="light"] { --bubble-max: 80%; }
     }
 
   </style>
@@ -400,6 +428,18 @@
   </div>
 
   <script>
+
+  marked.setOptions({
+  highlight: function(code, lang) {
+    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return hljs.highlight(code, { language }).value;
+  },
+  breaks: true, // trasforma i ritorni a capo in <br>
+  gfm: true     // GitHub Flavored Markdown
+});
+
+
+
     const container = document.getElementById('messagesInner');
     const chatBox   = document.getElementById('chatBox');
     let waiting = false;
@@ -417,19 +457,35 @@
     });
 
     function addMessage(text, who) {
-      const row = document.createElement('div');
-      row.className = 'message-row ' + who;
-      const label = document.createElement('div');
-      label.className = 'sender-label';
-      label.textContent = who === 'them' ? 'Funes' : 'Tu';
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble ' + who;
-      bubble.textContent = text;
-      row.appendChild(label);
-      row.appendChild(bubble);
-      container.appendChild(row);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+  const row = document.createElement('div');
+  row.className = 'message-row ' + who;
+  
+  const label = document.createElement('div');
+  label.className = 'sender-label';
+  label.textContent = who === 'them' ? 'Funes' : 'Tu';
+  
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + who;
+
+  // --- MODIFICA QUI ---
+  if (who === 'them') {
+    // Interpreta il markdown per le risposte dell'AI
+    bubble.innerHTML = marked.parse(text);
+    // Applica l'evidenziazione ai blocchi di codice appena creati
+    bubble.querySelectorAll('pre code').forEach((block) => {
+      hljs.highlightElement(block);
+    });
+  } else {
+    // Per l'utente, meglio restare sul testo semplice o markdown base
+    bubble.textContent = text;
+  }
+  // --------------------
+
+  row.appendChild(label);
+  row.appendChild(bubble);
+  container.appendChild(row);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
 
     function showTyping() {
       const row = document.createElement('div');

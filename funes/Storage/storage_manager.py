@@ -6,14 +6,34 @@ orbit = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\pla
 
 from datetime import datetime
 import json
+from funes.Storage.rag_system.chunker.semantic_chunker import LocalSemanticChunker
+from funes.Storage.rag_system.embeddings.sentence_transformer import SentenceTransformerEmbedding
+from funes.Storage.rag_system.memory.bm25_index import BM25Index
+from funes.Storage.rag_system.memory.knowledge_base_memory import KBMemory
+from funes.Storage.rag_system.vector_store.chroma_store import ChromaStore
 from funes.utils.planning_correlator import get_csv_task_plan
 
 
 class StorageManager:
     def __init__(self):
         self.storage = {}
+        self.kb = self._init_kb()
         self.tags_time_tagged  = ["Mission", "PlanValidityTimeWindow", "Satellite", "Operation"]
 
+
+    def _init_kb(self):
+        bm25_index = BM25Index()
+        embedder = SentenceTransformerEmbedding()
+        kb_collection = ChromaStore(collection_name="knowledge_base_collection", persist_path="saved_data/chroma_kb")
+        chunker = LocalSemanticChunker()
+        kb_memory = KBMemory(store=kb_collection, bm25_index=bm25_index, embedder=embedder, chunker=chunker)
+        return kb_memory
+    
+
+    def get_kb_results(self, query, search_k = 5, final_k = 3):
+        search_results = self.kb.reranked_search(query, k=search_k)
+        print("SM: risultati trovati:", len(search_results))
+        return search_results[0:final_k]
 
     def get_data_for_planning(self):
         task_plan = self.get_planning_data()
@@ -40,4 +60,8 @@ class StorageManager:
 
 if __name__ == "__main__":
     storage_manager = StorageManager()
-    print(storage_manager.get_data_for_planning())
+    kb_res  = storage_manager.get_kb_results("architecture and operational interfaces of FOS for HR-MS satellites in the IRIDE ground segment")
+
+    for res in kb_res:
+        metadata = res['metadata']
+        print(f"Title: {metadata['title']}, page: {metadata['page_number']} \n {res['text']}")

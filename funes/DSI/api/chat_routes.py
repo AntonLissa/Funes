@@ -9,7 +9,7 @@ from funes.DSI.core.session_manager import SessionManager
 from funes.DSI.services.chat_service import ChatService
 import funes.AIM.core.register_agents 
 from funes.AIM.core.agent_registry import registry
-from funes.Storage import StorageManager
+from funes.Storage.storage_manager import StorageManager
 
 chat_bp = Blueprint("chat", __name__, template_folder="templates")
 
@@ -19,7 +19,7 @@ provider = GroqProvider(config_loader.load_api_key())
 factory = AgentFactory(registry=registry, config_loader=config_loader, provider=provider)
 
 session_manager = SessionManager()
-storage_manager = None #StorageManager()
+storage_manager = StorageManager()
 chat_service = ChatService(session_manager, factory, storage_manager)
 
 
@@ -31,14 +31,15 @@ def index():
 def chat_start():
     chat_id = str(uuid.uuid4())
 
-    chat_service.start_chat(chat_id)
+    chat_service.start_chat(chat_id, agent_type = "kb")
     session["chat_id"] = chat_id
-    return jsonify({"chat_id": chat_id, "robot": "Bentornato! Come posso esserti utile?"})
+    return jsonify({"chat_id": chat_id, "robot": "Welcome back! How can I help you?"})
 
 @chat_bp.route("/chat/send_message", methods=["POST"])
 def chat_send_message():
     chat_id = session.get("chat_id")
     data = request.get_json()
     user_msg = data.get("message")
-    robot_msg = chat_service.send_message(chat_id, user_msg)
+    data = storage_manager.get_kb_results(user_msg)
+    robot_msg = chat_service.send_message(chat_id, user_msg, data=data)
     return jsonify({"child": user_msg, "robot": robot_msg})

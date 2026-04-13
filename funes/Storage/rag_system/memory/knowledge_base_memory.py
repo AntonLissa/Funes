@@ -1,8 +1,8 @@
 from funes.Storage.rag_system.chunker.base_chunker import BaseChunker
 
 from .memory import Memory
-from vector_store.vector_store import VectorStore
-from embeddings.embedding_model import EmbeddingModel
+from funes.Storage.rag_system.vector_store.vector_store import VectorStore
+from funes.Storage.rag_system.embeddings.embedding_model import EmbeddingModel
 from .bm25_index import BM25Index
 from sentence_transformers import CrossEncoder
 
@@ -12,7 +12,7 @@ class KBMemory(Memory):
     Usa un VectorStore per retrieval semantico.
     """
 
-    def __init__(self, store: VectorStore, bm25_index: BM25Index, embedder: EmbeddingModel, chunker: BaseChunker):
+    def __init__(self, store: VectorStore, bm25_index: BM25Index, embedder: EmbeddingModel, chunker: BaseChunker = None):
         self.store = store
         self.bm25_index = bm25_index
         self.embedder = embedder
@@ -26,7 +26,9 @@ class KBMemory(Memory):
             raise ValueError(f"Missing (i) field(i) in metadata: {missing}")
         return metadata
 
-    def add(self, path: str):
+    def add(self, path: str, chunker: BaseChunker = None):
+        if not self.chunker:
+            raise ValueError("Un chunker è richiesto per aggiungere documenti.")
         chunks = self.chunker.chunk(path)
 
         # 1. recupera content_hash già presenti nello store
