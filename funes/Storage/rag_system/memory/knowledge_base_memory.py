@@ -4,6 +4,7 @@ from .memory import Memory
 from vector_store.vector_store import VectorStore
 from embeddings.embedding_model import EmbeddingModel
 from .bm25_index import BM25Index
+from sentence_transformers import CrossEncoder
 
 class KBMemory(Memory):
     """
@@ -17,6 +18,7 @@ class KBMemory(Memory):
         self.embedder = embedder
         self.chunker = chunker
         self.required_metadata = [] # da definire
+        self.reranker = CrossEncoder('BAAI/bge-reranker-base')
 
     def _validate_metadata(self, metadata: dict):
         missing = [f for f in self.required_metadata if f not in metadata]
@@ -109,6 +111,26 @@ class KBMemory(Memory):
 
         # Restituisci solo i dati dei primi k
         return [item["data"] for item in sorted_results[:k]]
+    
+    def reranked_search(self, query: str, k: int = 3):
+        # 1. Ottieni i candidati dalla tua funzione RRF (prendine di più, es. 10-15)
+        initial_results = self.search_rrf(query, k)
+        
+        # 2. Prepara le coppie (Query, Documento) per il reranker
+        # Assumendo che 'data' contenga il testo del chunk
+        pairs = [[query, res['text']] for res in initial_results]
+        
+        # 3. Calcola i punteggi di pertinenza reali
+        scores = self.reranker.predict(pairs)
+        
+        # 4. Riallinea i punteggi ai risultati e ordina
+        for i, res in enumerate(initial_results):
+            res['rerank_score'] = scores[i]
+            
+        final_results = sorted(initial_results, key=lambda x: x['rerank_score'], reverse=True)
+        
+        # 5. Restituisci i top k finali
+        return final_results[:k]
 
     def get_all(self):
         """

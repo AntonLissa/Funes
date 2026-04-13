@@ -66,7 +66,8 @@ def run_retrieval_test(rrf = False):
     wrong_counter = 0
     for question in questions:
         if rrf:
-            search_results = kb_memory.search_rrf(question['question'], k=5)
+            #search_results = kb_memory.search_rrf(question['question'], k=5)
+            search_results = kb_memory.reranked_search(question['question'], k=5)
         else:
             search_results = kb_memory.search(question['question'], k=5)
         document_title = question['document']
@@ -96,10 +97,12 @@ recall, mrr, position = run_retrieval_test(rrf=True)
 print("TEST RRF")
 print(f"Results: Recall@5: {recall}, MRR: {mrr}")
 print(f"Position distribution: {position}")
+'''
+
 
 
 
 recall, mrr, position = run_retrieval_test(rrf=False)
 print("TEST SOLO VECTOR DB:")
 print(f"Results: Recall@5: {recall}, MRR: {mrr}")
-print(f"Position distribution: {position}")
+print(f"Position distribution: {position}")'''
