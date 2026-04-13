@@ -65,8 +65,7 @@ class LocalSemanticChunker(BaseChunker):
         return metadata
     
 
-    def chunk(self, file_path: str, sample_n: int = 10):
-        print("- SEMANTIC CHUNKER: initializing metadata and sampling...")
+    def chunk(self, file_path: str, sample_n: int = 5):
         doc_info = self.get_pdf_info(file_path)
         source_name = Path(file_path).name
         doc_hash = hashlib.md5(source_name.encode()).hexdigest()[:8]
@@ -79,12 +78,9 @@ class LocalSemanticChunker(BaseChunker):
         sample_limit = min(sample_n, len(all_raw_pages))
         sample_pages_text = [p["text"] for p in all_raw_pages[:sample_limit]]
         
-        print(f"- SEMANTIC CHUNKER: scanning first {sample_limit} pages for noise...")
         # Troviamo i pattern ripetitivi usando la tua funzione logica
         # Nota: passiamo solo i testi, non i Document
         repetitive_patterns = get_repetitive_patterns(sample_pages_text) 
-
-        print(f"- SEMANTIC CHUNKER: processing full document...")
 
         # 2. FASE DI GENERAZIONE
         for i, p in enumerate(all_raw_pages):

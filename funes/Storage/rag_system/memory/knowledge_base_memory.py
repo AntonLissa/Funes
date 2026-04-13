@@ -3,14 +3,17 @@ from funes.Storage.rag_system.chunker.base_chunker import BaseChunker
 from .memory import Memory
 from vector_store.vector_store import VectorStore
 from embeddings.embedding_model import EmbeddingModel
+from .bm25_index import BM25Index
+
 class KBMemory(Memory):
     """
     Memoria per documenti generici.
     Usa un VectorStore per retrieval semantico.
     """
 
-    def __init__(self, store: VectorStore, embedder: EmbeddingModel, chunker: BaseChunker):
+    def __init__(self, store: VectorStore, bm25_index: BM25Index, embedder: EmbeddingModel, chunker: BaseChunker):
         self.store = store
+        self.bm25_index = bm25_index
         self.embedder = embedder
         self.chunker = chunker
         self.required_metadata = [] # da definire
@@ -51,6 +54,8 @@ class KBMemory(Memory):
             metadata=metadatas
         )
 
+        self.bm25_index.add(new_chunks)
+
 
 
     def search(self, query: str, k: int = 3):
@@ -61,6 +66,49 @@ class KBMemory(Memory):
         results = self.store.search(embedding, k=k)
 
         return results
+    
+    def search_rrf(self, query: str, k: int = 3, rrf_k: int = 60):
+        """
+        Esegue la ricerca ibrida usando Reciprocal Rank Fusion.
+        rrf_k: costante (default 60) per bilanciare l'influenza dei rank bassi.
+        """
+        # 1. Ottieni risultati da entrambi (prendine un po' più di 'k' per la fusione)
+        num_candidates = k * 2
+        vector_results = self.store.search(self.embedder.embed(query), k=num_candidates)
+        bm25_results = self.bm25_index.search(query, k=num_candidates)
+
+        # 2. Dizionario per accumulare i punteggi RRF
+        # { "chunk_id": { "score": 0.0, "data": ... } }
+        rrf_scores = {}
+
+        # 3. Processa risultati Vettoriali
+        for rank, res in enumerate(vector_results):
+            # Assicurati di estrarre l'ID correttamente in base alla tua implementazione
+            uid = res.get('metadata', {}).get('chunk_id') or res.get('id')
+            if uid not in rrf_scores:
+                rrf_scores[uid] = {"score": 0.0, "data": res}
+            
+            # Formula RRF: 1 / (k + rank)
+            rrf_scores[uid]["score"] += 1.0 / (rrf_k + (rank + 1))
+
+        # 4. Processa risultati BM25
+        for rank, res in enumerate(bm25_results):
+            uid = res.get('chunk_id')
+            if uid not in rrf_scores:
+                # Se non era nei vettoriali, lo aggiungiamo
+                rrf_scores[uid] = {"score": 0.0, "data": res}
+            
+            rrf_scores[uid]["score"] += 1.0 / (rrf_k + (rank + 1))
+
+        # 5. Ordina per punteggio RRF decrescente
+        sorted_results = sorted(
+            rrf_scores.values(), 
+            key=lambda x: x["score"], 
+            reverse=True
+        )
+
+        # Restituisci solo i dati dei primi k
+        return [item["data"] for item in sorted_results[:k]]
 
     def get_all(self):
         """
@@ -68,3 +116,12 @@ class KBMemory(Memory):
         Utile per debug o per costruire un indice completo.
         """
         return self.store.get_all()
+
+    def clean_all_data(self):
+        """
+        Cancella completamente tutti i dati della memoria.
+        Utile quando usi una memoria persistente e vuoi resettarla.
+        """
+        
+        self.store.clean_all_data()
+        self.bm25_index.clean_all_data()

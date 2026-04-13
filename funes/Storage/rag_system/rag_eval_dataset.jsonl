@@ -1,100 +1,100 @@
-{"question": "architecture and operational interfaces of FOS for HR-MS #1 satellites within the IRIDE ground segment", "document": "FOS Architecture", "page": 3 }
-{"question": "how the Flight Operation Segment manages and interacts with the High Resolution Multispectral #1 satellites in the IRIDE system", "document": "FOS Architecture", "page": 3}
-{"question": "functions and data flows of MOC and SAP in HR-MS #1 Flight Operation Segment, including telemetry handling, command scheduling, and shutter control", "document": "FOS Architecture", "page": 5}
-{"question": "how the Mission Operation Centre and Service Access Point manage satellite commands, telemetry, and restricted area acquisitions in the HR-MS #1 constellation", "document": "FOS Architecture", "page": 5}
-{"question": "requirements and procedures for developing software validation specifications according to ECSS-E-ST-40, including stress, boundary, interface, and security testing", "document": "ECSS-E-ST-40C Rev.1", "page": 63}
-{"question": "how to create and document software tests to verify compliance with technical specifications, covering performance, error handling, interfaces, and security", "document": "ECSS-E-ST-40C Rev.1", "page": 63}
-{"question": "role and content of software system specification in ECSS-compliant projects, including requirements traceability and relation to SRR", "document": "ECSS-E-ST-40C Rev.1", "page": 107}
-{"question": "how the software system specification captures customer requirements, ensures traceability, and guides software validation and supplier implementation", "document": "ECSS-E-ST-40C Rev.1", "page": 107}
+{"question": "architecture and operational interfaces of FOS for HR-MS satellites in the IRIDE ground segment", "document": "FOS Architecture", "page": 3 }
+{"question": "how the fos manages and interacts with the high resolution multispectral satellites in the IRIDE system", "document": "FOS Architecture", "page": 3}
+{"question": "functions and data flows of MOC and SAP in HR-MS fos, with telemetry handling, command scheduling, and shutter control", "document": "FOS Architecture", "page": 5}
+{"question": "how the moc and sap manage satellite commands, telemetry, and restricted area acquisitions in the HR-MS constellation", "document": "FOS Architecture", "page": 5}
+{"question": "requirements and procedures for developing software validation specifications according to ECSS-E-ST-40", "document": "ECSS-E-ST-40C Rev.1", "page": 63}
+{"question": "how to create and document software tests to verify compliance with technical specifications", "document": "ECSS-E-ST-40C Rev.1", "page": 63}
+{"question": "role and content of software system specification in ECSS-compliant projects", "document": "ECSS-E-ST-40C Rev.1", "page": 107}
+{"question": "how the software system specification captures customer requirements and ensures traceability", "document": "ECSS-E-ST-40C Rev.1", "page": 107}
 {"question": "ECSS software verification and validation process requirements, including system security and validation with mission-representative data" , "document": "ECSS-E-ST-40C Rev.1", "page": 38}
-{"question": "how to plan and define software verification and validation, covering security checks, mission scenarios, and operational procedures" , "document": "ECSS-E-ST-40C Rev.1", "page": 38}
-{"question": "roles, activities, and iterative process of system engineering functions in multi-phase projects to meet technical, cost, and schedule objectives" , "document": "ECSS-E-ST-10C Rev.1", "page": 19}
+{"question": "how to plan and define software verification and validation" , "document": "ECSS-E-ST-40C Rev.1", "page": 38}
+{"question": "roles, activities, and iterative process of system engineering functions in multi-phase projects" , "document": "ECSS-E-ST-10C Rev.1", "page": 19}
 {"question": "how system engineering is applied throughout project phases to ensure the final product meets requirements, budget, and timeline goals" , "document": "ECSS-E-ST-10C Rev.1", "page": 19}
-{"question": "system engineering design process for lifecycle-compliant system architecture, including interface definition, product tree, hardware/software/HITL coverage, and design analysis" , "document": "ECSS-E-ST-10C Rev.1", "page": 31}
-{"question": "how system engineering develops and coordinates system design to cover functional architecture, components, interfaces, and analyses throughout the project lifecycle" , "document": "ECSS-E-ST-10C Rev.1", "page": 31}
-{"question": "purpose and structure of a Technology Plan within the system engineering plan to assess critical technologies and ensure timely system implementation" , "document": "ECSS-E-ST-10C Rev.1", "page": 70}
-{"question": "how a Technology Plan defines methods, resources, and organization to evaluate key technologies and prepare them for system development" , "document": "ECSS-E-ST-10C Rev.1", "page": 70}
-{"question": "identification and characterization of structural load events and environmental effects, including microgravity, noise, vibration, and launch-related mechanical and thermal loads", "document": "ECSS-E-ST-32C Rev.1", "page": 21}
-{"question": "what types of loads and environmental factors, like vibrations, acoustic noise, and launch forces, need to be considered for spacecraft structural design", "document": "ECSS-E-ST-32C Rev.1", "page": 21}
-{"question": "design allowables and probabilistic failure analysis for glass, ceramics, and other non-metallic materials, including size effects and load redistribution criteria", "document": "ECSS-E-ST-32C Rev.1", "page": 31}
-{"question": "how to define allowable stresses and account for flaws in glass, ceramics, and other non-metallics, considering safe load sharing in redundant structures", "document": "ECSS-E-ST-32C Rev.1", "page": 31}
-{"question": "fatigue analysis requirements for structural integrity, including stress concentrations, cumulative damage, load combinations, and material-specific safety factors", "document": "ECSS-E-ST-32C Rev.1", "page": 37}
-{"question": "how to perform fatigue analysis to ensure structures don’t fail over their service life, considering different loads, stress points, and material properties", "document": "ECSS-E-ST-32C Rev.1", "page": 37}
-{"question": "design considerations and safety requirements for propulsion systems, including thrust performance, hazardous materials handling, and RAMS analysis", "document": "ECSS-E-ST-35C Rev. 1 (6 March 2009)", "page": 26}
+{"question": "system engineering design process for lifecycle-compliant system architecture" , "document": "ECSS-E-ST-10C Rev.1", "page": 31}
+{"question": "how system engineering develops and coordinates system design to cover functional architecture, components, interfaces, and analyses in the project lifecycle" , "document": "ECSS-E-ST-10C Rev.1", "page": 31}
+{"question": "purpose and structure of a Technology Plan within the system engineering plan" , "document": "ECSS-E-ST-10C Rev.1", "page": 70}
+{"question": "how a Technology Plan defines methods, resources, and organization to evaluate technologies and prepare them for system development" , "document": "ECSS-E-ST-10C Rev.1", "page": 70}
+{"question": "identification and characterization of structural load events and environmental effects", "document": "ECSS-E-ST-32C Rev.1", "page": 21}
+{"question": "what types of loads and environmental factors need to be considered for spacecraft structural design", "document": "ECSS-E-ST-32C Rev.1", "page": 21}
+{"question": "design allowables and probabilistic failure analysis for materials, including size effects and load redistribution criteria", "document": "ECSS-E-ST-32C Rev.1", "page": 31}
+{"question": "how to define allowable stresses and account for flaws in materials", "document": "ECSS-E-ST-32C Rev.1", "page": 31}
+{"question": "fatigue analysis requirements for structural integrity", "document": "ECSS-E-ST-32C Rev.1", "page": 37}
+{"question": "how to perform fatigue analysis to ensure structures don’t fail over their service life", "document": "ECSS-E-ST-32C Rev.1", "page": 37}
+{"question": "design considerations and safety requirements for propulsion systems", "document": "ECSS-E-ST-35C Rev. 1 (6 March 2009)", "page": 26}
 {"question": "what are the key characteristics and safety practices for designing and operating propulsion systems with toxic or reactive materials", "document": "ECSS-E-ST-35C Rev. 1 (6 March 2009)", "page": 26}
-{"question": "requirements for propulsion system interfaces with spacecraft and subsystems, including geometry, mechanical loads, fluid connections, and thermal boundaries", "document": "ECSS-E-ST-35C Rev. 1 (6 March 2009)", "page": 28}
-{"question": "how propulsion systems need to interface with the vehicle and components, covering dimensions, forces, fluid lines, and thermal conditions", "document": "ECSS-E-ST-35C Rev. 1 (6 March 2009)", "page": 28}
-{"question": "design and verification requirements for propulsion monitoring and control systems, including control loop stability, power, sampling, dynamic coupling, FMECA, and parameter accuracy", "document": "ECSS-E-ST-35C Rev. 1 (6 March 2009)", "page": 39}
-{"question": "how to monitor and control a propulsion system, covering stability, response times, measurement accuracy, failure analysis, and data collection for safety and operations", "document": "ECSS-E-ST-35C Rev. 1 (6 March 2009)", "page": 39}
-{"question": "objectives and policy rationale of the ECSS standards for European space projects, including cost, quality, safety, interoperability, and communication", "document": "ECSS-S-ST-00C Rev.2", "page": 10}
-{"question": "why ECSS standards are used in European space programs and how they improve project efficiency, product quality, and compatibility", "document": "ECSS-S-ST-00C Rev.2", "page": 10}
-{"question": "objectives and scope of project management in ECSS, including cost, schedule, technical performance, and integration of management, engineering, and product assurance functions", "document": "ECSS-S-ST-00C Rev.2", "page": 15}
-{"question": "how project management is structured in ECSS to ensure successful delivery of space projects across all lifecycle stages and customer-supplier levels", "document": "ECSS-S-ST-00C Rev.2", "page": 15}
-{"question": "types and roles of business agreements in ECSS projects, including contracts, MOUs, inter-agency agreements, and their use for governing exchanges and compliance", "document": "ECSS-S-ST-00C Rev.2", "page": 24}
-{"question": "how legally binding agreements between customers and suppliers structure work, obligations, and verification in space projects", "document": "ECSS-S-ST-00C Rev.2", "page": 24}
-{"question": "objectives and requirements of software product assurance in space projects, including quality management, lifecycle activities, and customer-supplier responsibilities", "document": "ECSS-Q-ST-80C Rev.2", "page": 20}
-{"question": "how software product assurance ensures that space software meets requirements, performs safely and securely, and maintains quality throughout its lifecycle", "document": "ECSS-Q-ST-80C Rev.2", "page": 20}
-{"question": "requirements for defining and reviewing the software development life cycle in ECSS, including phases, inputs/outputs, milestones, responsibilities, and quality objectives", "document": "ECSS-Q-ST-80C Rev.2", "page": 40}
-{"question": "how to establish and assess the software life cycle for space projects, covering phase outputs, milestone reviews, and alignment with product assurance and security requirements", "document": "ECSS-Q-ST-80C Rev.2", "page": 40}
-{"question": "definition and documentation of responsibilities, authority, and interfaces in software product assurance, including delegation to lower-level suppliers", "document": "ECSS-Q-ST-80C Rev.2", "page": 24}
-{"question": "how roles, duties, and organizational interfaces are assigned and controlled in software assurance, and how accountability is retained when tasks are delegated", "document": "ECSS-Q-ST-80C Rev.2", "page": 24}
-{"question": "planetary protection requirements for space missions based on COSPAR policy and Article IX of the Outer Space Treaty, including forward and backward contamination control", "document": "ECSS-U-ST-20C", "page": 6}
+{"question": "requirements for propulsion system interfaces with spacecraft and subsystems", "document": "ECSS-E-ST-35C Rev. 1 (6 March 2009)", "page": 28}
+{"question": "how propulsion systems need to interface with the vehicle and components", "document": "ECSS-E-ST-35C Rev. 1 (6 March 2009)", "page": 28}
+{"question": "design and verification requirements for propulsion monitoring and control systems, including control loop stability and power", "document": "ECSS-E-ST-35C Rev. 1 (6 March 2009)", "page": 39}
+{"question": "how to monitor and control a propulsion system stability and response times", "document": "ECSS-E-ST-35C Rev. 1 (6 March 2009)", "page": 39}
+{"question": "objectives and policy rationale of the ECSS standards for European space projects", "document": "ECSS-S-ST-00C Rev.2", "page": 10}
+{"question": "why ECSS standards are used in European space programs and how they improve project efficiency", "document": "ECSS-S-ST-00C Rev.2", "page": 10}
+{"question": "objectives and scope of project management in ECSS", "document": "ECSS-S-ST-00C Rev.2", "page": 15}
+{"question": "how project management is structured in ECSS", "document": "ECSS-S-ST-00C Rev.2", "page": 15}
+{"question": "types and roles of business agreements in ECSS projects", "document": "ECSS-S-ST-00C Rev.2", "page": 24}
+{"question": "how legally binding agreements between customers and suppliers structure work and verification", "document": "ECSS-S-ST-00C Rev.2", "page": 24}
+{"question": "objectives and requirements of software product assurance in space projects", "document": "ECSS-Q-ST-80C Rev.2", "page": 20}
+{"question": "how software product assurance ensures that space software meets requirements", "document": "ECSS-Q-ST-80C Rev.2", "page": 20}
+{"question": "requirements for defining and reviewing the software development life cycle in ECSS", "document": "ECSS-Q-ST-80C Rev.2", "page": 40}
+{"question": "how to establish and assess the software life cycle for space projects, from phase outputs to milestone reviews", "document": "ECSS-Q-ST-80C Rev.2", "page": 40}
+{"question": "definition and documentation of responsibilities, authority, and interfaces in software product assurance", "document": "ECSS-Q-ST-80C Rev.2", "page": 24}
+{"question": "how roles, duties, and organizational interfaces are assigned and controlled in software assurance", "document": "ECSS-Q-ST-80C Rev.2", "page": 24}
+{"question": "planetary protection requirements for space missions based on COSPAR policy", "document": "ECSS-U-ST-20C", "page": 6}
 {"question": "how international regulations and COSPAR guidelines protect Earth and scientific investigations from contamination by spacecraft", "document": "ECSS-U-ST-20C", "page": 6}
-{"question": "roles and responsibilities of the Planetary Protection Approval Authority in implementing COSPAR policy, including assessments, compliance verification, and reporting", "document": "ECSS-U-ST-20C", "page": 14}
-{"question": "how a planetary protection office ensures missions follow COSPAR requirements, covering project categorization, facility reviews, pre-launch checks, and reporting", "document": "ECSS-U-ST-20C", "page": 14}
-{"question": "definition and criteria for Mars special regions, including water activity, temperature thresholds, timescales, and features like gullies, subsurface cavities, and Recurrent Slope Lineae", "document": "ECSS-U-ST-20C", "page": 18}
-{"question": "what conditions and surface features classify areas on Mars as special regions, considering water availability, temperature, and recurring slope flows", "document": "ECSS-U-ST-20C", "page": 18}
-{"question": "planetary protection requirements for flight hardware, including ISO class cleanroom assembly and probability of impact analysis for Solar System bodies", "document": "ECSS-U-ST-20C", "page": 21}
-{"question": "how spacecraft hardware must be assembled and analyzed to minimize impact risks on protected planets and moons, covering reliability, meteoroid effects, and orbital uncertainties", "document": "ECSS-U-ST-20C", "page": 21}
+{"question": "roles and responsibilities of the Planetary Protection Approval Authority in implementing COSPAR policy", "document": "ECSS-U-ST-20C", "page": 14}
+{"question": "how a planetary protection office ensures missions follow COSPAR requirements", "document": "ECSS-U-ST-20C", "page": 14}
+{"question": "definition and criteria for Mars special regions", "document": "ECSS-U-ST-20C", "page": 18}
+{"question": "what conditions and surface features classify areas on Mars as special regions", "document": "ECSS-U-ST-20C", "page": 18}
+{"question": "planetary protection requirements for flight hardware", "document": "ECSS-U-ST-20C", "page": 21}
+{"question": "how spacecraft hardware must be assembled and analyzed to minimize impact risks on protected planets and moons", "document": "ECSS-U-ST-20C", "page": 21}
 {"question": "requirements for organic material inventories and sample retention for Moon and Mars missions in compliance with planetary protection standards", "document": "ECSS-U-ST-20C", "page": 22}
-{"question": "how spacecraft must document and store organic materials for lunar and Martian missions, including sample quantities and long-term preservation", "document": "ECSS-U-ST-20C", "page": 22}
-{"question": "planetary protection requirements for Europa and Enceladus sample return missions, including outbound leg compliance, catastrophic consequence categorization, and containment of unsterilized materials", "document": "ECSS-U-ST-20C", "page": 28}
-{"question": "how sample return missions from Europa or Enceladus must manage unsterilized material to protect Earth, including severity classification and PPAA approval", "document": "ECSS-U-ST-20C", "page": 28}
+{"question": "how spacecraft must document and store organic materials for lunar missions", "document": "ECSS-U-ST-20C", "page": 22}
+{"question": "planetary protection requirements for Europa and Enceladus sample return missions", "document": "ECSS-U-ST-20C", "page": 28}
+{"question": "how sample return missions from Europa or Enceladus must manage material to protect Earth", "document": "ECSS-U-ST-20C", "page": 28}
 {"question": "PCB design reliability requirements, including evaluation of complex features, minimum dimensions, insulation distances, and track fan-out", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 28}
-{"question": "how to ensure PCB reliability by managing design complexity, spacing between tracks, and using qualification before finalizing designs", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 28}
-{"question": "criteria for selecting PCB materials for space applications, including Tg, CTE, dielectric constant, moisture sensitivity, interconnection constraints, and advantages of polyimide vs epoxy", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 32}
-{"question": "how to choose PCB materials and stack-ups for thermal stability, expansion compatibility, and moisture performance, considering rigid-flex options and material properties", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 32}
-{"question": "copper cladding requirements for PCBs, including symmetric thickness, review of asymmetric build-ups, and recommended layer thicknesses for internal and external layers", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 37}
-{"question": "how to select and document copper thickness on PCB layers, considering equal plating, exceptions for outer layers, and effects on manufacturability", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 37}
-{"question": "minimum bending radius requirements for flex PCBs based on laminate and copper thickness, including static and dynamic applications", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 68}
-{"question": "how to determine safe bending radius for flexible PCBs to prevent damage during mounting and removal, considering board type and layer thickness", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 68}
-{"question": "cover layer placement requirements for rigid-flex PCBs, including flex and rigid sections, extension limits, bondply offset, and via pad restrictions", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 77 }
-{"question": "how to position and extend the cover layer on flexible and rigid parts of a PCB while avoiding stress on vias and weak points in multilayer boards", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 77}
-{"question": "use of heat sinks and metal/non-metal inserts on PCBs for thermal management and controlling in-plane thermal expansion, including effects on solderability", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 79 }
-{"question": "how heat sinks and inserts like invar, molybdenum, or AlN ceramic help manage PCB temperature and expansion, and their impact on soldering", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 79}
-{"question": "criteria for selecting materials for high-frequency PCBs considering RF performance, lamination, peel strength, and drilling issues", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 101}
+{"question": "how to ensure PCB reliability by managing design complexity", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 28}
+{"question": "criteria for selecting PCB materials for space applications", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 32}
+{"question": "how to choose PCB materials and stack-ups for thermal stability", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 32}
+{"question": "copper cladding requirements for PCBs", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 37}
+{"question": "how to select and document copper thickness on PCB layers, considering equal plating", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 37}
+{"question": "minimum bending radius requirements for flex PCBs based on laminate and copper thickness", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 68}
+{"question": "how to determine safe bending radius for flexible PCBs to prevent damage during mounting and removal", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 68}
+{"question": "cover layer placement requirements for rigid-flex PCBs", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 77 }
+{"question": "how to position and extend the cover layer on flexible and rigid parts of a PCB while avoiding stress", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 77}
+{"question": "use of heat sinks and metal/non-metal inserts on PCBs", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 79 }
+{"question": "how heat sinks and inserts help manage PCB temperature and expansion, and their impact on soldering", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 79}
+{"question": "criteria for selecting materials for high-frequency PCBs considering RF performance", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 101}
 {"question": "how to choose PCB materials for RF applications that balance signal quality and manufacturability", "document": "ECSS-Q-ST-70-12C-Rev.1", "page": 101}
-{"question": "methods for monitoring spacecraft contamination using infrared spectroscopy, including direct and indirect approaches", "document": "ECSS-Q-ST-70-05C Rev.2", "page": 15}
+{"question": "methods for monitoring spacecraft contamination using infrared spectroscopy", "document": "ECSS-Q-ST-70-05C Rev.2", "page": 15}
 {"question": "how infrared spectroscopy is used to check contamination on spacecraft surfaces and equipment", "document": "ECSS-Q-ST-70-05C Rev.2", "page": 15}
 {"question": "What are the required steps and certification intervals for auditing measurement equipment before it is used in material qualification tests?", "document": "ECSS-Q-ST-70-05C Rev.2", "page": 42}
 {"question": "How does a company check and certify its testing machines to make sure test results are valid, and how often do they need to renew this certification?", "document": "ECSS-Q-ST-70-05C Rev.2", "page": 42}
 {"question": "What are the main limitations of dispersive infrared spectrometers in terms of slit width, resolution, and acquisition time?", "document": "ECSS-Q-ST-70-05C Rev.2", "page": 46}
 {"question": "Why do older infrared spectrometers have a trade-off between clarity and signal quality, and why are they often replaced by newer instruments?", "document": "ECSS-Q-ST-70-05C Rev.2", "page": 46}
 {"question": "How does a Fourier transform infrared spectrometer use an interferometer to produce a modulated IR signal?", "document": "ECSS-Q-ST-70-05C Rev.2", "page": 47}
-{"question": "What is the process by which FTIR devices split and recombine infrared light to measure samples?", "document": "ECSS-Q-ST-70-05C Rev.2", "page": 47}
-{"question": "How is a space system model structured to represent system elements and capture lifecycle knowledge for hardware and software products?", "document": "Space engineering", "page": 15 }
+{"question": "What is the process by which FTIR devices use infrared light to measure samples?", "document": "ECSS-Q-ST-70-05C Rev.2", "page": 47}
+{"question": "How is a space system model structured to represent system elements for hardware and software products?", "document": "Space engineering", "page": 15 }
 {"question": "How do engineers organize documentation to reflect the hierarchy and components of a space system throughout its lifecycle?", "document": "Space engineering", "page": 15}
-{"question": "What defines reporting data in a space system, and how are parameters and compound parameters used to represent measurements or outputs?", "document": "Space engineering", "page": 17}
-{"question": "How does a space system organize the information it produces, like telemetry or maneuver data, and what are the basic units used to structure it?", "document": "Space engineering", "page": 17}
-{"question": "How is the SSM data model structured using tables, entity types, and value types to define monitoring and control data for delivered products?", "document": "Space engineering", "page": 20}
-{"question": "How do suppliers organize the data for space system products using tables that describe each type of information and its rules?", "document": "Space engineering", "page": 20}
-{"question": "How does the SSM ensure unique identification of components using relative names and reference paths in a distributed space system?", "document": "Space engineering", "page": 22}
-{"question": "How are names made unique across different suppliers in a space system using local identifiers and hierarchical paths?", "document": "Space engineering", "page": 22}
+{"question": "What defines reporting data in a space system, and how are parameters used to represent measurements or outputs?", "document": "Space engineering", "page": 17}
+{"question": "How does a space system organize the information it produces, and what are the basic units used to structure it?", "document": "Space engineering", "page": 17}
+{"question": "How is the SSM data model structured using tables, and value types to define monitoring and control data for delivered products?", "document": "Space engineering", "page": 20}
+{"question": "How do suppliers organize the data for space system products using tables that describe information and its rules?", "document": "Space engineering", "page": 20}
+{"question": "How does the SSM ensure unique identification of components in a distributed space system?", "document": "Space engineering", "page": 22}
+{"question": "How are names made unique across different suppliers in a space system ?", "document": "Space engineering", "page": 22}
 {"question": "What are the definitions, syntax, and usage of Boolean and Integer simple data types in the SSM, including their constants and applicable operations?", "document": "Space engineering", "page": 25}
-{"question": "How are basic data types like true/false values and whole numbers represented and used in space system data models, and what rules apply to them?", "document": "Space engineering", "page": 25}
-{"question": "What requirements must a product data schema meet for monitoring and control, including language compliance, integrity, and configuration management?", "document": "Space engineering", "page": 38}
-{"question": "How should suppliers prepare and deliver space system data so it can be correctly read, reused, and managed throughout the lifecycle?", "document": "Space engineering", "page": 38}
+{"question": "How are basic data types represented and used in space system data models, and what rules apply to them?", "document": "Space engineering", "page": 25}
+{"question": "What requirements must a product data schema meet for monitoring and control?", "document": "Space engineering", "page": 38}
+{"question": "How should suppliers prepare and deliver space system data so it can be correctly managed throughout the lifecycle?", "document": "Space engineering", "page": 38}
 {"question": "How are synthetic parameters in the EMCS generated from reporting data, and what conditions can trigger their evaluation?", "document": "Space engineering", "page": 41}
 {"question": "How can a space system create new parameters from existing data, and when are these new values calculated automatically?", "document": "Space engineering", "page": 41}
 {"question": "What rules govern the language, case sensitivity, and traceability of monitoring and control data in the SSM during product integration?", "document": "Space engineering", "page": 47}
-{"question": "How should space system data be recorded and tracked, including language use, capitalization, and keeping old names for traceability?", "document": "Space engineering", "page": 47}
-{"question": "How are the terms ‘shall,’ ‘should,’ formally used to distinguish requirements, recommendations, and permissions in the standard?", "document": "ECSS-Q-ST-20-07C", "page": 11}
+{"question": "How should space system data be recorded and tracked for traceability?", "document": "Space engineering", "page": 47}
+{"question": "How are the terms ‘shall,’ ‘should,’ used to distinguish requirements, recommendations, and permissions in the standard?", "document": "ECSS-Q-ST-20-07C", "page": 11}
 {"question": "What do the different directive words mean in the standard, and how do they indicate what is mandatory, suggested, or optional?", "document": "ECSS-Q-ST-20-07C", "page": 11}
 {"question": "What is the goal of quality and safety assurance programs in space test centres regarding technical and programmatic risks?", "document": "ECSS-Q-ST-20-07C", "page": 13}
 {"question": "Why do space test centres have quality and safety management, and what risks is it meant to control?", "document": "ECSS-Q-ST-20-07C", "page": 13}
-{"question": "How must a space test centre define, assess, and manage the competence and training of personnel for test processes and facility operations?", "document": "ECSS-Q-ST-20-07C", "page": 18}
+{"question": "How must a space test centre define, and manage the competence and training of personnel for test processes and facility operations?", "document": "ECSS-Q-ST-20-07C", "page": 18}
 {"question": "What steps do space test centres take to ensure their staff have the right skills and training for performing tests and managing facilities?", "document": "ECSS-Q-ST-20-07C", "page": 18}
-{"question": "What causes total ionizing dose (TID) degradation in electronic components, and how do shielding materials affect its mitigation?", "document": "ECSS-Q-ST-60-15C Rev.1", "page": 15}
+{"question": "What causes total ionizing dose degradation in electronic components, and how do shielding materials affect its mitigation?", "document": "ECSS-Q-ST-60-15C Rev.1", "page": 15}
 {"question": "How does long-term exposure to space radiation damage electronics, and why is it challenging to fully protect them with shielding?", "document": "ECSS-Q-ST-60-15C Rev.1", "page": 15}
 {"question": "What is the role and timing of ERCBs in validating parts and subsystems against radiation effects in space projects?", "document": "ECSS-Q-ST-60-15C Rev.1", "page": 17}
 {"question": "How do space programs check that parts and equipment meet radiation requirements, and when are these reviews conducted during the project lifecycle?", "document": "ECSS-Q-ST-60-15C Rev.1", "page": 17}
