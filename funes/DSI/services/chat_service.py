@@ -25,3 +25,7 @@ class ChatService:
             raise ValueError("Chat not found")
         session.add_user_message(message)
         return session.get_response(data)
+
+    def get_chat_conversation(self, chat_id):
+        chat_session =  self.session_manager.get_chat(chat_id)
+        return chat_session.get_conversation()

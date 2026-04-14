@@ -11,6 +11,100 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
+/* bottone menu */
+.menu-toggle{
+  position:fixed;
+  top:15px;
+  left:15px;
+  z-index:1001;
+  background:none;
+  border:none;
+  font-size:20px;
+  cursor:pointer;
+  color: var(--icon-color);
+}
+
+/* SIDENAV */
+
+.sidenav{
+  
+  position:fixed;
+  top:0;
+  left:0;
+  width:260px;
+  height:100%;
+  background: var(--page-bg);
+  border-right:1px solid #2a2a2a;
+  padding-top: 60px;
+  padding-left: 10px;
+  display:flex;
+  flex-direction:column;
+  transform:translateX(-100%);
+  transition:transform .25s ease;
+  z-index:1000;
+}
+
+.sidenav.open{
+  transform:translateX(0);
+}
+
+/* top section */
+
+.sidenav-top{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.side-btn{
+  background:var(--page-bg);
+  border:none;
+  padding:10px 12px;
+  border-radius:8px;
+  color:var(--title-color);
+  text-align:left;
+  cursor:pointer;
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.side-btn:hover{
+  background:var(--input-bg);
+}
+
+.new-chat{
+  background:var(--sub-color);
+}
+
+/* chat history */
+
+.chat-history{
+  overflow-y:auto;
+  flex:1;
+}
+
+.history-title{
+  font-size:12px;
+  color:#888;
+  margin-bottom:10px;
+}
+
+.chat-item{
+  width:100%;
+  border:none;
+  background:none;
+  color:var(--title-color);
+  text-align:left;
+  padding:8px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.chat-item:hover{
+  background:var(--input-bg);
+}
 
     /* Aggiungi queste regole nel tuo <style> */
 .bubble.them ul, .bubble.them ol {
@@ -144,21 +238,21 @@
     }
 
     /* ── HEADER ── */
-    header {
-      z-index: 20;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.85rem 1.5rem;
-      background: var(--header-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      transition: background .4s, border-color .4s;
-    }
+header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-    .brand { display: flex; flex-direction: column; gap: 2px; }
+
+.brand {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
 
     .brand-name {
       font-family: 'Playfair Display', serif;
@@ -191,7 +285,12 @@
       50%      { box-shadow: 0 0 0 5px transparent; }
     }
 
-    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
     .icon-btn {
       width: 34px; height: 34px; border-radius: 50%;
@@ -402,6 +501,37 @@
 </head>
 <body>
 
+
+  <button class="menu-toggle" id="menuToggle">
+  <i class="fas fa-bars"></i>
+</button>
+
+<aside class="sidenav" id="sidenav">
+
+  <div class="sidenav-top">
+    <button class="side-btn new-chat">
+      <i class="fas fa-plus"></i>
+      New chat
+    </button>
+
+    <button class="side-btn">
+      <i class="fas fa-search"></i>
+      Find chat
+    </button>
+  </div>
+
+  <div class="chat-history">
+    <div class="history-title">Recent</div>
+
+    <button class="chat-item">Chat 1</button>
+    <button class="chat-item">Chat 2</button>
+    <button class="chat-item">Chat 3</button>
+
+  </div>
+
+</aside>
+
+
   <header>
     <div class="brand">
       <span class="brand-name">Funes</span>
@@ -428,6 +558,14 @@
   </div>
 
   <script>
+// SIDENAV
+    const menuToggle = document.getElementById("menuToggle");
+const sidenav = document.getElementById("sidenav");
+
+menuToggle.addEventListener("click", () => {
+  sidenav.classList.toggle("open");
+});
+
 
   marked.setOptions({
   highlight: function(code, lang) {

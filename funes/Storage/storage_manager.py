@@ -21,6 +21,7 @@ class StorageManager:
         self.tags_time_tagged  = ["Mission", "PlanValidityTimeWindow", "Satellite", "Operation"]
 
 
+
     def _init_kb(self):
         bm25_index = BM25Index()
         embedder = SentenceTransformerEmbedding()
@@ -31,8 +32,8 @@ class StorageManager:
     
 
     def get_kb_results(self, query, search_k = 5, final_k = 3):
+        print("SM: enhanced query:", query)
         search_results = self.kb.reranked_search(query, k=search_k)
-        print("SM: risultati trovati:", len(search_results))
         return search_results[0:final_k]
 
     def get_data_for_planning(self):

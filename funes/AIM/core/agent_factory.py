@@ -7,6 +7,7 @@ class AgentFactory:
         self.registry = registry
         self.llm_config = config_loader.load_yaml()
         self.provider = provider
+        self.models = {'small': 'llama-3.1-8b-instant', 'large': 'llama-3.3-70b-versatile'}
 
     def create_agent(self, agent_type):
 
@@ -21,7 +22,7 @@ class AgentFactory:
         }
 
         return agent_class(
-            model_name="llama-3.1-8b-instant",
+            model_name=self.models[self.llm_config[agent_type]['model_size']],
             prompts=prompts,
             provider=self.provider
         )

@@ -18,6 +18,7 @@ provider = GroqProvider(config_loader.load_api_key())
 
 factory = AgentFactory(registry=registry, config_loader=config_loader, provider=provider)
 
+query_llm = factory.create_agent('query')
 session_manager = SessionManager()
 storage_manager = StorageManager()
 chat_service = ChatService(session_manager, factory, storage_manager)
@@ -40,6 +41,8 @@ def chat_send_message():
     chat_id = session.get("chat_id")
     data = request.get_json()
     user_msg = data.get("message")
-    data = storage_manager.get_kb_results(user_msg)
+
+    enhanced_query = query_llm.speak(conversation = chat_service.get_chat_conversation(chat_id=chat_id), query=user_msg)
+    data = storage_manager.get_kb_results(enhanced_query)
     robot_msg = chat_service.send_message(chat_id, user_msg, data=data)
     return jsonify({"child": user_msg, "robot": robot_msg})
