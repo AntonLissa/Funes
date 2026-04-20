@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Syncopate&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
 /* bottone menu */
@@ -255,11 +257,11 @@ header {
 
 
     .brand-name {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Syncopate', sans-serif;
       font-size: clamp(1.1rem, 2.5vw, 1.4rem);
-      font-weight: 600;
+      
       color: var(--title-color);
-      letter-spacing: 0.01em;
+      letter-spacing: 0.1em;
       line-height: 1;
       transition: color .4s;
     }
@@ -520,12 +522,8 @@ header {
     </button>
   </div>
 
-  <div class="chat-history">
+  <div class="chat-history", id = "chat-history">
     <div class="history-title">Recent</div>
-
-    <button class="chat-item">Chat 1</button>
-    <button class="chat-item">Chat 2</button>
-    <button class="chat-item">Chat 3</button>
 
   </div>
 
@@ -534,7 +532,7 @@ header {
 
   <header>
     <div class="brand">
-      <span class="brand-name">Funes</span>
+      <span class="brand-name">FUNES</span>
     </div>
     <div class="header-actions">
       <button class="icon-btn" id="themeToggle" title="Cambia tema">
@@ -558,7 +556,7 @@ header {
   </div>
 
   <script>
-// SIDENAV
+// --- SIDENAV CODES ---
     const menuToggle = document.getElementById("menuToggle");
 const sidenav = document.getElementById("sidenav");
 
@@ -566,6 +564,62 @@ menuToggle.addEventListener("click", () => {
   sidenav.classList.toggle("open");
 });
 
+
+async function loadChats() {
+  console.log("LOading chats");
+    const response = await fetch("/chat/load_latest");
+    const data = await response.json();
+
+    const chats = data.chats;
+    console.log(chats);
+
+    const container = document.getElementById("chat-history");
+
+    chats.forEach(chat => {
+
+        const button = document.createElement("button");
+
+        button.className = "chat-item";
+
+        button.textContent = "Chat " + chat._id.substring(0, 6);
+
+        button.dataset.chatId = chat._id;
+        button.onclick = () => loadChat(chat._id);
+
+        container.appendChild(button);
+        console.log("created ", button);
+    });
+}
+
+loadChats();
+
+
+// --- LOAD A CHAT ---
+async function loadChat(chatId) {
+  cleanChatBox();
+  console.log("Loading chat", chatId);
+  const response = await fetch("/load_chat/" + chatId);
+  const data = await response.json();
+
+  const messages = data.messages;
+  console.log(messages);
+
+  chatBox.innerHTML = ""; // pulisce la chat attuale
+
+  messages.forEach(msg => {
+
+    const who = msg.role === "assistant" ? "them" : "me";
+
+    addMessage(msg.text, who);
+
+  });
+
+}
+
+
+
+
+// --- OTHER CODES ---
 
   marked.setOptions({
   highlight: function(code, lang) {
@@ -594,35 +648,48 @@ menuToggle.addEventListener("click", () => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('sendBtn').click(); }
     });
 
-    function addMessage(text, who) {
-  const row = document.createElement('div');
-  row.className = 'message-row ' + who;
-  
-  const label = document.createElement('div');
-  label.className = 'sender-label';
-  label.textContent = who === 'them' ? 'Funes' : 'Tu';
-  
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble ' + who;
+    function cleanChatBox() {
+    container.innerHTML = "";
+}
 
-  // --- MODIFICA QUI ---
-  if (who === 'them') {
-    // Interpreta il markdown per le risposte dell'AI
-    bubble.innerHTML = marked.parse(text);
-    // Applica l'evidenziazione ai blocchi di codice appena creati
-    bubble.querySelectorAll('pre code').forEach((block) => {
-      hljs.highlightElement(block);
-    });
-  } else {
-    // Per l'utente, meglio restare sul testo semplice o markdown base
-    bubble.textContent = text;
-  }
-  // --------------------
 
-  row.appendChild(label);
-  row.appendChild(bubble);
-  container.appendChild(row);
-  chatBox.scrollTop = chatBox.scrollHeight;
+  function addMessage(text, who) {
+    console.log("BEFORE");
+    console.log(chatBox);
+    console.log(container);
+    console.log("Adding message", text, " from ", who);
+      const row = document.createElement('div');
+      row.className = 'message-row ' + who;
+      
+      const label = document.createElement('div');
+      label.className = 'sender-label';
+      label.textContent = who === 'them' ? 'Funes' : 'You';
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble ' + who;
+
+      // --- MODIFICA QUI ---
+      if (who === 'them') {
+        // Interpreta il markdown per le risposte dell'AI
+        bubble.innerHTML = marked.parse(text);
+        // Applica l'evidenziazione ai blocchi di codice appena creati
+        bubble.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+      } else {
+        // Per l'utente, meglio restare sul testo semplice o markdown base
+        bubble.textContent = text;
+      }
+      // --------------------
+
+      row.appendChild(label);
+      row.appendChild(bubble);
+      container.appendChild(row);
+      console.log("AFTER:");
+      console.log(chatBox);
+      console.log(container);
+      chatBox.appendChild(container);
+      chatBox.scrollTop = chatBox.scrollHeight;
 }
 
     function showTyping() {
@@ -648,7 +715,7 @@ menuToggle.addEventListener("click", () => {
 
     window.onload = async function () {
       showTyping();
-      const res  = await fetch('/chat/start');
+      const res  = await fetch('/chat/new');
       const data = await res.json();
       hideTyping();
       addMessage(data.robot, 'them');

@@ -32,7 +32,6 @@ class BaseLLM(ABC):
         return self.session_history[-n:]
 
     def speak(self, data):
-
         prompt = self.build_prompt(data)
 
         response = self.provider.call(

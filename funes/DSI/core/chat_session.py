@@ -17,8 +17,12 @@ class ChatSession:
 
     def get_response(self, data):
         reply = self.agent.speak(data)
-        self.history.append({"role": "robot", "text": reply})
+        self.history.append({"role": "assistant", "text": reply})
         return reply
+
+    def set_history(self, history):
+        self.history = history
+        self.agent.session_history = history
 
     def get_conversation(self):
         return self.history

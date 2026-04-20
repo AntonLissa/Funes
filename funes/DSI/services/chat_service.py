@@ -26,6 +26,10 @@ class ChatService:
         session.add_user_message(message)
         return session.get_response(data)
 
+    def load_data_from_db(self, chat_id, data):
+         session = self.session_manager.get_chat(chat_id)
+         session.set_history(data)
+
     def get_chat_conversation(self, chat_id):
         chat_session =  self.session_manager.get_chat(chat_id)
         return chat_session.get_conversation()

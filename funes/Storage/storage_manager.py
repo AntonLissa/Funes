@@ -6,6 +6,7 @@ orbit = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\pla
 
 from datetime import datetime
 import json
+from funes.Storage.chat_storage.chat_storage import ChatStorage
 from funes.Storage.rag_system.chunker.semantic_chunker import LocalSemanticChunker
 from funes.Storage.rag_system.embeddings.sentence_transformer import SentenceTransformerEmbedding
 from funes.Storage.rag_system.memory.bm25_index import BM25Index
@@ -13,11 +14,13 @@ from funes.Storage.rag_system.memory.knowledge_base_memory import KBMemory
 from funes.Storage.rag_system.vector_store.chroma_store import ChromaStore
 from funes.utils.planning_correlator import get_csv_task_plan
 
-
 class StorageManager:
-    def __init__(self):
+    def __init__(self, light_mode = True):
         self.storage = {}
-        self.kb = self._init_kb()
+        self.light_mode = light_mode
+        if not light_mode:
+            self.kb = self._init_kb()
+        self.chat = ChatStorage( )
         self.tags_time_tagged  = ["Mission", "PlanValidityTimeWindow", "Satellite", "Operation"]
 
 
@@ -32,7 +35,7 @@ class StorageManager:
     
 
     def get_kb_results(self, query, search_k = 5, final_k = 3):
-        print("SM: enhanced query:", query)
+        if self.light_mode: return ''
         search_results = self.kb.reranked_search(query, k=search_k)
         return search_results[0:final_k]
 
@@ -57,6 +60,21 @@ class StorageManager:
         with open(json_path, 'r') as f:
             data = json.load(f)
         return json.dumps(data, default=str, separators=(",", ":")) 
+    
+
+
+    # CHAT FUNCTIONALITIES
+    def create_chat(self, chat_id, user_id, agent):
+        return  self.chat.create_chat(chat_id, user_id, agent)
+
+    def save_message(self, chat_id, user_id, role, content):
+         self.chat.save_message(chat_id, user_id, role, content)
+
+    def list_user_chats(self, user_id):
+        return  self.chat.list_user_chats(user_id)
+
+    def get_chat_messages(self, chat_id):
+        return  self.chat.get_messages(chat_id)
     
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import MongoClient
 from datetime import datetime
 import uuid
 
@@ -7,31 +7,52 @@ class ChatStorage:
 
     def __init__(self, uri="mongodb://localhost:27017", db="llm_chats"):
 
-        self.client = AsyncIOMotorClient(uri)
+        self.client = MongoClient(uri)
         self.db = self.client[db]
 
         self.chats = self.db.chats
         self.messages = self.db.messages
+        self.ensure_indexes()
+        
+        
+    def ensure_indexes(self):
 
-    async def create_chat(self, user_id, agent):
+        self.messages.create_index("chat_id")
+        self.messages.create_index([("chat_id", 1), ("created_at", 1)])
+        self.chats.create_index("user_id")
 
-        chat_id = str(uuid.uuid4())
+
+    def create_chat(self, chat_id, user_id, agent):
 
         chat = {
             "_id": chat_id,
             "user_id": user_id,
             "agent": agent,
-            "created_at": datetime.now(),
-            "updated_at": datetime.now(),
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow(),
             "message_count": 0,
             "token_count": 0
         }
 
-        await self.chats.insert_one(chat)
+        self.chats.insert_one(chat)
 
-        return chat_id
+    def save_message_user(self, chat_id, user_id, content):
+        return self.save_message(
+            chat_id=chat_id,
+            user_id=user_id,
+            role="user",
+            content=content
+        )
 
-    async def save_message(
+    def save_message_assistant(self, chat_id, user_id, content):
+        return self.save_message(
+            chat_id=chat_id,
+            user_id=user_id,
+            role="assistant",
+            content=content
+        )
+
+    def save_message(
         self,
         chat_id,
         user_id,
@@ -58,9 +79,9 @@ class ChatStorage:
             "created_at": datetime.utcnow()
         }
 
-        await self.messages.insert_one(message)
+        self.messages.insert_one(message)
 
-        await self.chats.update_one(
+        self.chats.update_one(
             {"_id": chat_id},
             {
                 "$inc": {
@@ -76,7 +97,7 @@ class ChatStorage:
 
         return message["_id"]
 
-    async def get_messages(self, chat_id, limit=100):
+    def get_messages(self, chat_id, limit=100):
 
         cursor = (
             self.messages
@@ -85,15 +106,15 @@ class ChatStorage:
             .limit(limit)
         )
 
-        return await cursor.to_list(length=limit)
+        return list(cursor)
 
-    async def list_user_chats(self, user_id):
+    def list_user_chats(self, user_id):
 
         cursor = (
             self.chats
             .find({"user_id": user_id})
             .sort("updated_at", -1)
+            .limit(100)
         )
 
-        return await cursor.to_list(length=100)
-
+        return list(cursor)
