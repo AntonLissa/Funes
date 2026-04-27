@@ -17,14 +17,24 @@ class DispatcherLLM(BaseLLM):
                 provider=provider
             )
 
-    def get_reasoning_and_tools(self, query):
-        # Otteniamo la risposta testuale dall'LLM
-        llm_answer = self.speak(query)
-        data = json.loads(llm_answer)
-        return {
-              'analysis': data['analysis'],
-              'tools': data['tools']
-        }
+    def get_reasoning_and_tools(self, query, tools_used=None):
+        try:
+            # Otteniamo la risposta testuale dall'LLM
+            data = {'user_query': query}
+            llm_answer = self.speak(data)
+            data = json.loads(llm_answer)
+            
+   
+            return {
+                'analysis': data['analysis'],
+                'tools': data['tools']
+            }
+        except Exception as e:
+            print(f"Errore durante l'analisi della risposta del dispatcher: {str(e)}")
+            return {
+                'analysis': "Non sono riuscito ad analizzare la query.",
+                'tools': []
+            }
 
 
     def build_prompt(self, query):

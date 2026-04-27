@@ -20,5 +20,5 @@ class PlanningLLM(BaseLLM):
             datetime=data['datetime'],
             satellite_passages=data['satellite_passages'],
             sequence_of_events=data['soe'],
-            conversation_history=self.session_history
+            user_query=data['user_query'],
         )

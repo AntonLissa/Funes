@@ -26,8 +26,8 @@ class KBLLM(BaseLLM):
     def build_prompt(self, data):
 
         return self.user_prompt.format(
-            useful_info = self.rag_info_builder(data),
-            conversation_history=self.get_recent_history(n=3),
-            user_query = self.get_last_user_message(),
+            useful_info = self.rag_info_builder(data['rag_data']),
+            conversation_history=data['conversation_history'],
+            user_query = data['user_query'],
             datetime = ''
         )

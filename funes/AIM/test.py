@@ -59,9 +59,9 @@ def build_tools(llms):
     def fds_tool(query: str):
         return "FDS: maneuver executed yesterday 18:42 UTC"
 
-    def knowledge_base_tool(conversation, query: str):
-        query_enhanced = query_llm.speak(conversation, query)
-        rag_data = storage_manager.get_kb_results(query)
+    def knowledge_base_tool(query: str):
+        query_enhanced = query_llm.speak(kb_llm.get_recent_history(3), query)
+        rag_data = storage_manager.get_kb_results(query_enhanced)
         kb_llm.add_user_message(query)
         return kb_llm.speak(rag_data)
 
@@ -78,11 +78,9 @@ def build_tools(llms):
 # -------------------------
 # DISPATCHER NODE
 # -------------------------
-
 def dispatcher_node(state: AgentState, dispatcher_llm):
 
     result = dispatcher_llm.get_reasoning_and_tools(state["query"])
-
     print("\n[DISPATCHER ANALYSIS]")
     print(result["analysis"])
     print("[TOOLS]", result["tools"])
@@ -123,6 +121,8 @@ def master_node(state: AgentState, master_llm):
         "tool_results": state.get("tool_results", {})
     })
 
+    print(f"--- TOOL RESULT ---\n {state.get("tool_results", {})}")
+
     return {
         "final_answer": response
     }
@@ -135,7 +135,7 @@ def master_node(state: AgentState, master_llm):
 def build_graph(llms, tool_registry):
     dispatcher_llm = llms['dispatcher']
     master_llm = llms['master']
-    query_llm = llms['query']
+
 
     graph = StateGraph(AgentState)
 

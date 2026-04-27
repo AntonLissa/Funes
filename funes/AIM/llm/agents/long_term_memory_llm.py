@@ -2,8 +2,8 @@
 
 from funes.AIM.llm.agents.base_llm import BaseLLM
 
-class QueryRewriteLLM(BaseLLM):
-    agent_type="planning"
+class LTMemoryLLM(BaseLLM):
+    agent_type="long_term_memory"
 
     def __init__(self, model_name, prompts, provider):
         super().__init__(
@@ -13,11 +13,8 @@ class QueryRewriteLLM(BaseLLM):
             provider=provider
         )
 
-
-
     def build_prompt(self, data):
 
         return self.user_prompt.format(
-            conversation_history=data.get("conversation_history", []),
-            user_query=data.get("user_query", "")
+            conversation_history=data['conversation_history'],  
         )

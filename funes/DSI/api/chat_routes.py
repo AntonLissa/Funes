@@ -10,6 +10,8 @@ from funes.DSI.services.chat_service import ChatService
 import funes.AIM.core.register_agents 
 from funes.AIM.core.agent_registry import registry
 from funes.Storage.storage_manager import StorageManager
+from funes.langgraph.graph.graph_engine import GraphEngine
+from langchain_core.messages import HumanMessage, AIMessage
 
 chat_bp = Blueprint("chat", __name__, template_folder="templates")
 
@@ -18,12 +20,11 @@ provider = GroqProvider(config_loader.load_api_key())
 
 factory =   AgentFactory(registry=registry, config_loader=config_loader, provider=provider)
 
-query_llm = factory.create_agent('query')
 session_manager = SessionManager()
 storage_manager = StorageManager(light_mode=False)
 chat_service = ChatService(session_manager, factory, storage_manager)
 
-
+engine = GraphEngine(factory, storage_manager)
 
 user_id = 'user_1' # SOLO PER TEST
 
@@ -66,13 +67,19 @@ def chat_send_message():
     data = request.get_json()
     user_msg = data.get("message")
 
-    if query_llm:
-        enhanced_query = query_llm.speak(conversation = chat_service.get_chat_conversation(chat_id=chat_id), query=user_msg)
-        print(f"chat routes: ENHANCED QUERY: {enhanced_query}")
-    else:
-        enhanced_query = user_msg
-    data = storage_manager.get_kb_results(enhanced_query)
-    robot_msg = chat_service.send_message(chat_id, user_msg, data=data)
+    if not user_msg:
+        return jsonify({"error": "No message provided"}), 400
+
+    try:
+        # 2. DELEGA AL GRAFO: Fa tutto lui (Dispatcher -> Tools -> Master)
+        # Nota: se vuoi passare la storia della conversazione, potresti dover 
+        # passare il chat_id al GraphEngine per recuperare i messaggi precedenti.
+        robot_msg = engine.run(user_msg, chat_id=chat_id)
+
+        
+    except Exception as e:
+        print(f"Errore nel GraphEngine: {e}")
+        robot_msg = f"Mi dispiace, si è verificato un errore tecnico nell'elaborazione della richiesta: {e}"
     
     storage_manager.save_message(chat_id=chat_id, user_id=user_id, role="user", content=user_msg)
     storage_manager.save_message(chat_id=chat_id, user_id=user_id, role="assistant", content=robot_msg)
@@ -98,6 +105,7 @@ def get_chat(chat_id):
 
 
     formatted = []
+    graph_messages = []
 
     for m in messages:
         formatted.append({
@@ -105,6 +113,15 @@ def get_chat(chat_id):
             "text": m["content"],
             "datetime": str(m.get("created_at"))
         })
+        if m["role"] == "user":
+            graph_messages.append(HumanMessage(content=m["content"]))
+        else:
+            graph_messages.append(AIMessage(content=m["content"]))
+   
+    engine.app.update_state(
+    config={"configurable": {"thread_id": chat_id}},
+    values={"messages": graph_messages}
+    )
 
     chat_service.load_data_from_db(chat_id, formatted)
 

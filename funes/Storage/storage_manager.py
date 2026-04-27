@@ -34,14 +34,18 @@ class StorageManager:
         return kb_memory
     
 
+    def save_to_long_term_memory(self, data):
+        # Here you would implement the logic to save the data to your long-term storage solution.
+        # This could be a database, a file system, or any other storage mechanism you choose.
+        # For demonstration purposes, we'll just print the data to the console.
+        print(f"Saving to long-term memory: {data}")
+
     def get_kb_results(self, query, search_k = 5, final_k = 3):
         if self.light_mode: return ''
         search_results = self.kb.reranked_search(query, k=search_k)
         return search_results[0:final_k]
 
     def get_data_for_planning(self):
-        task_plan = self.get_planning_data()
-        satellite_passages = self.get_orbit_from_json()
 
         return {
             "planning_data": self.get_planning_data(),

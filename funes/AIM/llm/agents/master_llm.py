@@ -16,15 +16,12 @@ class MasterLLM(BaseLLM):
 
     def build_prompt(self, data):
 
-        tool_results = data.get("tool_results", {})
-
-
         return self.user_prompt.format(
             datetime=datetime.now(),
 
             user_query=data.get("query", ""),
 
-            conversation_history=self.get_recent_history(5),
+            conversation_history=data.get("conversation_history", []),
             
-            tool_results = tool_results
+            tool_results = data.get("tool_results", {})
         )
