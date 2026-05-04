@@ -12,6 +12,7 @@ from funes.AIM.core.agent_registry import registry
 from funes.Storage.storage_manager import StorageManager
 from funes.langgraph.graph.graph_engine import GraphEngine
 from langchain_core.messages import HumanMessage, AIMessage
+from flask import send_from_directory
 
 chat_bp = Blueprint("chat", __name__, template_folder="templates")
 
@@ -27,6 +28,7 @@ chat_service = ChatService(session_manager, factory, storage_manager)
 engine = GraphEngine(factory, storage_manager)
 
 user_id = 'user_1' # SOLO PER TEST
+
 
 
 def check_chat_started():
@@ -49,11 +51,24 @@ def check_chat_started():
 
 
 
+EXT_DATA_PATH = r'C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example' # Esempio, metti il tuo
+
+@chat_bp.route('/data_extern/<path:filename>')
+def serve_external_data(filename):
+    # Questa funzione va a prendere il file fisico nella cartella esterna
+    # e lo "spara" al browser come se fosse un file statico
+    return send_from_directory(EXT_DATA_PATH, filename)
+
+@chat_bp.route('/dashboard-terra') # Questo è l'URL che apparirà nella barra del browser
+def dashboard():
+    return render_template('earth_dashboard.html')
+
+
+
 @chat_bp.route("/")
 def index():
 
     session.pop("chat_id", None)
-
     return render_template("chat.html")
 
 

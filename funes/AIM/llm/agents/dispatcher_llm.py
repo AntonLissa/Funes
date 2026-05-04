@@ -17,10 +17,11 @@ class DispatcherLLM(BaseLLM):
                 provider=provider
             )
 
-    def get_reasoning_and_tools(self, query, tools_used=None):
+    def get_reasoning_and_tools(self, query, conversation_history):
         try:
             # Otteniamo la risposta testuale dall'LLM
-            data = {'user_query': query}
+            data = {'user_query': query, 'conversation_history': conversation_history}
+            print(f"[DISPATCHER LLM] Data sent to LLM:\n{data}")
             llm_answer = self.speak(data)
             data = json.loads(llm_answer)
             
@@ -37,8 +38,8 @@ class DispatcherLLM(BaseLLM):
             }
 
 
-    def build_prompt(self, query):
-            return self.user_prompt.format(user_query = query)
+    def build_prompt(self, data):
+            return self.user_prompt.format(user_query = data['user_query'], conversation_history = data['conversation_history'])
 
 
 if __name__ == '__main__':
@@ -113,7 +114,7 @@ if __name__ == '__main__':
         print("_"*30)
         q = queries[i]
         print(f"- Question: {q}")
-        answer = agent.get_reasoning_and_tools(query = q)
+        answer = agent.get_reasoning_and_tools(query = q, conversation_history = "")
         for elem in answer:
             print(f"    - {elem}: {answer[elem]}")
         

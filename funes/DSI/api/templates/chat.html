@@ -13,6 +13,47 @@
 <link href="https://fonts.googleapis.com/css2?family=Syncopate&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
+/* 1. Larghezza della scrollbar */
+.chat-history::-webkit-scrollbar {
+  width: 5px; /* Sottile ed elegante */
+}
+
+/* 2. Lo sfondo della traccia (parte vuota) */
+.chat-history::-webkit-scrollbar-track {
+  background: transparent; 
+  margin: 5px;
+}
+
+/* 3. La "maniglia" (la parte che si muove) */
+.chat-history::-webkit-scrollbar-thumb {
+  background: var(--scrollbar); /* Usa il colore che hai già definito */
+  border-radius: 10px;
+  transition: background 0.3s;
+}
+
+/* 4. Effetto al passaggio del mouse sulla scrollbar */
+.chat-history::-webkit-scrollbar-thumb:hover {
+  background: var(--me-bg); /* Diventa più accesa (bordeaux) quando ci passi sopra */
+}
+
+/* Per Firefox (usa una sintassi diversa) */
+.chat-history {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+}
+    /* Forza i link dentro la sidenav a usare il font e il colore corretti */
+.side-btn, .side-btn:visited, .side-btn:active {
+    font-family: 'Mulish', sans-serif; /* Lo stesso del tuo body */
+    color: var(--title-color);        /* Il colore definito nelle variabili */
+    text-decoration: none;
+    font-size: 0.9rem;                /* Regola la dimensione se necessario */
+}
+
+/* Assicura che anche gli span dentro il link siano allineati */
+.side-btn span {
+    font-family: inherit;
+    color: inherit;
+}
 /* bottone menu */
 .menu-toggle{
   position:fixed;
@@ -511,15 +552,18 @@ header {
 <aside class="sidenav" id="sidenav">
 
   <div class="sidenav-top">
-    <button class="side-btn new-chat">
-      <i class="fas fa-plus"></i>
-      New chat
-    </button>
+    <a href="{{ url_for('chat.index') }}" class="side-btn new-chat" style="text-decoration: none;">
+    <i class="fas fa-plus"></i> <span>New Chat</span>
+</a>
 
     <button class="side-btn">
       <i class="fas fa-search"></i>
       Find chat
     </button>
+
+  <a href="{{ url_for('chat.dashboard') }}" class="side-btn" target = "_blank" style="text-decoration: none; display: inline-block;">
+      Dashboard
+  </a>
   </div>
 
   <div class="chat-history", id = "chat-history">

@@ -103,3 +103,9 @@ def normalize_text(text):
     text = text.lower()
     text = re.sub(r"\s+", " ", text)
     return text.strip()
+
+
+def conversation_to_text(messages):
+    if not messages:        return ""
+    
+    return "\n".join([f"{msg.type.upper()}: {msg.content}" for msg in messages])

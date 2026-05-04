@@ -102,6 +102,8 @@ def get_csv_task_plan(path, date_start=None, date_end=None, satellite_id=None, s
     df = df[cols_task_plan_acq]
     df["start_time"] = pd.to_datetime(df["start_time"], format="%Y-%m-%d %H:%M:%S.%f", errors='coerce').dt.floor("s")
     df["stop_time"] = pd.to_datetime(df["stop_time"], format="%Y-%m-%d %H:%M:%S.%f", errors='coerce').dt.floor("s")
+    date_end = pd.to_datetime(date_end) + pd.Timedelta(days=1)
+
     if date_start:
         df = df[df['start_time'] >= date_start]
     if date_end:
@@ -121,8 +123,8 @@ if __name__ == '__main__':
     task_plan_Acq = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\TASK_PLAN_ACQ_20260317.csv"
     time_tagged_data = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\IME01_24032026095915680_TIME_TAGGED.xml"
     cmp_data = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\INPUT\IME01_PL_PPF_CMP_20260311T133622_20260318T000000_20260320T000000_DEV_001.xml"
-    task_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\TASK_PLAN_NOMINAL_20260318.csv"
-    
-    df = get_csv_task_plan(task_path, acquisition_filter=True)
-    df = json.dumps(df.to_dict(orient="records"), default=str, separators=(",", ":"))  # Convert DataFrame to JSON string, handling datetime serialization
+    task_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\TASK_PLAN_NOMINAL_20260318.csv"
+        
+    df = get_csv_task_plan(task_path, date_start="2026-03-18", date_end="2026-03-18", acquisition_filter=True)
+    #df = json.dumps(df.to_dict(orient="records"), default=str, separators=(",", ":"))  # Convert DataFrame to JSON string, handling datetime serialization
     print(df)

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Terra 3D - Three.js</title>
+  <style>
+    body { margin: 0; overflow: hidden; background-color: #000; }
+    canvas { display: block; }
+    
+    #dashboard {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: rgba(0, 0, 0, 0.4); /* Transparent background */
+      backdrop-filter: blur(8px);    /* Modern blur effect */
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      width: 220px;
+      user-select: none;
+    }
+
+    .stat-row { margin-bottom: 8px; font-size: 13px; }
+    .label { color: #aaa; font-size: 11px; text-transform: uppercase; }
+    
+    #speedSlider {
+      width: 100%;
+      margin-top: 10px;
+      cursor: pointer;
+      accent-color: #4CAF50;
+    }
+
+    #satLabel {
+      position: absolute;
+      color: white;
+      font-family: monospace;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid #4CAF50;
+      border-radius: 4px;
+      pointer-events: none;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="dashboard">
+  <div class="stat-row">
+    <div class="label">Current Time</div>
+    <div id="timeLabel">Loading...</div>
+  </div>
+  <div class="stat-row">
+    <div class="label">Sim Speed: <span id="speedLabel">1</span>x</div>
+    <input id="speedSlider" type="range" min="1" max="5000" value="1" step="100">
+  </div>
+</div>
+
+<div id="satLabel">IME01</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+</script>
+
+<script type="module">
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+  let states = [];
+  let currentSimDate = null; // The internal clock
+  let simSpeed = 1;
+  let lastFrameTime = performance.now();
+
+  const speedSlider = document.getElementById("speedSlider");
+  const speedLabel = document.getElementById("speedLabel");
+  const timeLabel = document.getElementById("timeLabel");
+
+  speedSlider.addEventListener("input", (e) => {
+    simSpeed = parseFloat(e.target.value);
+    speedLabel.innerText = simSpeed;
+  });
+
+  // SCENE SETUP
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100000);
+  camera.position.set(0, 0, 15000);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+  sunLight.position.set(5, 3, 5);
+  scene.add(sunLight);
+
+  // EARTH
+  const radius = 6378;
+  const textureLoader = new THREE.TextureLoader();
+  const earthTexture = textureLoader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+  const earth = new THREE.Mesh(
+    new THREE.SphereGeometry(radius, 64, 64),
+    new THREE.MeshStandardMaterial({ map: earthTexture })
+  );
+  scene.add(earth);
+
+  // SATELLITE
+  const satellite = new THREE.Mesh(
+    new THREE.SphereGeometry(100, 16, 16),
+    new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+  );
+  scene.add(satellite);
+
+  // TRAIL
+  const trailPositions = [];
+  const trailMaxPoints = 1000;
+  const trailGeometry = new THREE.BufferGeometry();
+  const trailMaterial = new THREE.LineBasicMaterial({ color: 0x4CAF50, transparent: true, opacity: 0.6 });
+  const trailLine = new THREE.Line(trailGeometry, trailMaterial);
+  scene.add(trailLine);
+
+  const satLabel = document.getElementById("satLabel");
+
+  function updateLabel(position) {
+    const vector = position.clone().project(camera);
+    const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+    satLabel.style.transform = `translate(-50%, -150%) translate(${x}px, ${y}px)`;
+    
+    // Hide label if satellite is behind Earth
+    const satDist = camera.position.distanceTo(position);
+    const earthDist = camera.position.distanceTo(earth.position);
+    satLabel.style.display = (satDist > earthDist + radius * 0.5) ? 'none' : 'block';
+  }
+
+
+let lastPosition = new THREE.Vector3();
+function animate(now) {
+  requestAnimationFrame(animate);
+  
+  const dt = (now - lastFrameTime) / 1000;
+  lastFrameTime = now;
+
+  if (states.length > 0 && currentSimDate) {
+    // 1. Calculate the new potential time
+    let nextTimeMs = currentSimDate.getTime() + (dt * 1000 * simSpeed);
+
+    // 2. LOOP LOGIC: If we pass the file end, wrap back to the start
+    if (nextTimeMs > window.fileEnd) {
+      // Modulo math ensures that even at high speeds, 
+      // the "extra" time is carried over to the next loop correctly.
+      const overflow = (nextTimeMs - window.fileEnd) % window.fileDuration;
+      nextTimeMs = window.fileStart + overflow;
+      
+      // CLEAR TRAIL (Optional)
+      // If you want the trail to reset when the orbit restarts:
+      // trailPositions.length = 0; 
+    }
+
+    currentSimDate = new Date(nextTimeMs);
+
+    // 3. Update position and UI
+    const pos = interpolate(states, currentSimDate);
+    satellite.position.copy(pos);
+    
+    if(lastPosition && lastPosition.distanceTo(pos) > 100/simSpeed) {
+      updateTrail(pos.clone());
+      lastPosition = pos.clone();
+    }
+    updateLabel(pos.clone());
+
+    // Display consistent time (ISO format or similar)
+    timeLabel.innerText = currentSimDate.toISOString().replace('T', ' ').substring(0, 19);
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+  // DATA LOADING
+  async function loadOEM() {
+    try {
+      const filename = '/REGRESSION-TEST-20260324/REGRESSION-TEST-20260324/PLANNING/INPUT/IME01_OEM_20260316T000000_20260326T000000_001.xml';
+    
+      const response = await fetch(`/data_extern/${filename}`);
+      const text = await response.text();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, "text/xml");
+      const nodes = xml.getElementsByTagName("stateVector");
+      const data = [];
+      for (let node of nodes) {
+        data.push({
+          time: new Date(node.getElementsByTagName("EPOCH")[0].textContent),
+          pos: new THREE.Vector3(
+            parseFloat(node.getElementsByTagName("X")[0].textContent),
+            parseFloat(node.getElementsByTagName("Y")[0].textContent),
+            parseFloat(node.getElementsByTagName("Z")[0].textContent)
+          )
+        });
+      }
+      return data;
+    } catch (e) {
+      console.error("Failed to load OEM, using dummy data for preview", e);
+      return []; 
+    }
+  }
+
+ loadOEM().then(data => {
+  if (data.length > 0) {
+    states = data;
+    // Define the absolute boundaries of your file
+    const fileStartTime = states[0].time.getTime();
+    const fileEndTime = states[states.length - 1].time.getTime();
+    const fileDuration = fileEndTime - fileStartTime;
+
+    // Initialize the simulation clock exactly at the file's start
+    currentSimDate = new Date(fileStartTime);
+    
+    // Store these globally for use in animate()
+    window.fileStart = fileStartTime;
+    window.fileEnd = fileEndTime;
+    window.fileDuration = fileDuration;
+  }
+});
+
+  function interpolate(states, currentTime) {
+    for (let i = 0; i < states.length - 1; i++) {
+      const t1 = states[i].time;
+      const t2 = states[i + 1].time;
+      if (currentTime >= t1 && currentTime <= t2) {
+        const alpha = (currentTime - t1) / (t2 - t1);
+        return states[i].pos.clone().lerp(states[i + 1].pos, alpha);
+      }
+    }
+    return states.length > 0 ? states[0].pos : new THREE.Vector3();
+  }
+
+  function updateTrail(position) {
+    trailPositions.push(position.x, position.y, position.z);
+    if (trailPositions.length > trailMaxPoints * 3) trailPositions.splice(0, 3);
+    trailGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(trailPositions), 3));
+    trailGeometry.setDrawRange(0, trailPositions.length / 3);
+  }
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  animate(performance.now());
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 from funes.AIM.core.agent_factory import AgentFactory
 from funes.Storage.storage_manager import StorageManager
 from funes.langgraph.tools.base_tool import BaseTool
+from funes.utils.utils import conversation_to_text
 
 
 class KnowledgeBaseTool(BaseTool):
@@ -20,12 +21,10 @@ class KnowledgeBaseTool(BaseTool):
 
         query = conversation[-1].content
 
-        history_messages = conversation[-7:-1]  # ultimi 3 scambi
+        history_messages = conversation[-7:-1]  
 
-        history_text = "\n".join(
-            f"{'User' if m.type == 'human' else 'Assistant'}: {m.content}"
-            for m in history_messages
-        )
+        history_text = conversation_to_text(history_messages)
+        
 
         data = {
             "user_query": query,

@@ -45,19 +45,26 @@ class StorageManager:
         search_results = self.kb.reranked_search(query, k=search_k)
         return search_results[0:final_k]
 
-    def get_data_for_planning(self):
+    def get_data_for_planning(self, filters=None):
+
+        filters = filters or {}
+
+        planning_data = self.get_planning_data(
+            date_start=filters.get("date_start"),
+            date_end=filters.get("date_end"),
+            satellite=filters.get("satellite"),
+        )
 
         return {
-            "planning_data": self.get_planning_data(),
+            "planning_data": planning_data,
             "datetime": datetime.now().isoformat(),
-            "satellite_passages": self.get_orbit_from_json(),
-            "soe": None
+            "satellite_passages": "",
+            "soe": ""
         }
 
-    def get_planning_data(self):
+    def get_planning_data(self, date_start=None, date_end=None, satellite=None):
         task_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\TASK_PLAN_NOMINAL_20260318.csv"
-    
-        return get_csv_task_plan(task_path, date_start="2026-03-18", date_end="2026-03-19", acquisition_filter=True)
+        return get_csv_task_plan(task_path, date_start=date_start, date_end=date_end, acquisition_filter=True)
 
     def get_orbit_from_json(self):
         json_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\INPUT\IME01_CTBL_20260316T000000_20260321T000000_001.json"
@@ -82,9 +89,10 @@ class StorageManager:
     
 
 if __name__ == "__main__":
-    storage_manager = StorageManager()
-    kb_res  = storage_manager.get_kb_results("architecture and operational interfaces of FOS for HR-MS satellites in the IRIDE ground segment")
-
-    for res in kb_res:
-        metadata = res['metadata']
-        print(f"Title: {metadata['title']}, page: {metadata['page_number']} \n {res['text']}")
+    storage_manager = StorageManager(light_mode=True)
+    data = storage_manager.get_data_for_planning({
+        "date_start": "2026-03-17",
+        "date_end": "2026-03-18",
+        "satellite": None})
+    
+    print(data)
