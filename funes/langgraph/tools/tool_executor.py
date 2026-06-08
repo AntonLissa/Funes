@@ -8,7 +8,7 @@ class ToolExecutor:
         self._tools[tool.name] = tool
 
     def execute(self, tool_name: str, query: str) -> str:
-        """Esegue il tool corrispondente al nome ricevuto dal Dispatcher."""
+        """Esegue il tool corrispondente al nome ricevuto."""
         print('[EXECUTOR] Ricevuto comando per eseguire:', tool_name)
         tool = self._tools.get(tool_name)
         

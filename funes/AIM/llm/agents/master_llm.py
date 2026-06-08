@@ -23,5 +23,40 @@ class MasterLLM(BaseLLM):
 
             conversation_history=data.get("conversation_history", []),
             
-            tool_results = data.get("tool_results", {})
+            tool_results = data.get("tool_results", {}),
+
+            investigation_state = data.get("investigation_state", {}),
+
+            json_format = self.get_json_format_instructions()
         )
+    
+    def get_json_format_instructions(self):
+        return """{
+            "task": {
+            "user_request": ""
+            },
+
+            "facts": [],
+
+            "hypotheses": [],
+
+            "knowledge_gaps": [],
+
+            "reasoning_log": [
+            {
+                  "observation": "",
+                  "inference": "",
+                  "next_information_needed": ""
+            }
+            ],
+
+            "investigation_log": [],
+
+            "decision": {
+            "action": "CALL_TOOL | FINAL_RESPONSE",
+            "justification": "",
+            "tool_calls": [e.g. knowledge_base_tool, ticket_tool, etc. ]
+            },
+
+            "final_answer": null
+            }"""

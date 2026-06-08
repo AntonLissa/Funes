@@ -2,6 +2,7 @@
 tags_time_tagged  = ["Mission", "PlanValidityTimeWindow", "Satellite", "Operation"]
 tags_task_plan_acq = ["satellite_id", "station_id", "task_name", "macro_activity_id", "priority", "acquisition_id"]
 import xml.etree.ElementTree as ET
+import numpy as np
 import pandas as pd
 import json
 
@@ -97,7 +98,7 @@ class XMLPlanningCleaner:
 
 cols_task_plan_acq = ["is_emergency_task", "id", "start_time", "stop_time", 'passage_id', 'satellite_id', 'station_id', 'task_status', 'task_type', 'task_name',  'priority']
 
-def get_csv_task_plan(path, date_start=None, date_end=None, satellite_id=None, station_id=None, acquisition_filter = False):
+def get_csv_task_plan(path, date_start=None, date_end=None, satellite_id=None, station_id=None, acquisition_filter = False, station_filter = False):
     df = pd.read_csv(path)
     df = df[cols_task_plan_acq]
     df["start_time"] = pd.to_datetime(df["start_time"], format="%Y-%m-%d %H:%M:%S.%f", errors='coerce').dt.floor("s")
@@ -114,9 +115,147 @@ def get_csv_task_plan(path, date_start=None, date_end=None, satellite_id=None, s
         df = df[df['station_id'] == station_id]
     if acquisition_filter:
         df = df[df['task_type'] == "ACQ"]
+    if station_filter:
+        df = df[df['station_id'].notna()]
     df = json.dumps(df.to_dict(orient="records"), default=str, separators=(",", ":")) 
     return df
-          
+
+def get_passages_from_xml(
+    path,
+    date_start=None,
+    date_end=None,
+    satellite_id=None,
+    station_id=None
+):
+    df = pd.read_csv(path)
+
+    # tieni solo colonne utili
+    df = df[cols_task_plan_acq].copy()
+
+    # datetime seri
+    df["start_time"] = pd.to_datetime(
+        df["start_time"],
+        format="%Y-%m-%d %H:%M:%S.%f",
+        errors="coerce"
+    ).dt.floor("s")
+
+    df["stop_time"] = pd.to_datetime(
+        df["stop_time"],
+        format="%Y-%m-%d %H:%M:%S.%f",
+        errors="coerce"
+    ).dt.floor("s")
+
+    # --- FILTRI ---
+    if date_start is not None:
+        date_start = pd.to_datetime(date_start)
+        df = df[df["stop_time"] >= date_start]  # overlap intelligente
+
+    if date_end is not None:
+        date_end = pd.to_datetime(date_end) + pd.Timedelta(days=1)
+        df = df[df["start_time"] <= date_end]
+
+    if satellite_id is not None:
+        df = df[df["satellite_id"] == satellite_id]
+
+    if station_id is not None:
+        df = df[df["station_id"] == station_id]
+
+    # ordina
+    df = df.sort_values(
+        ["satellite_id", "station_id", "passage_id", "start_time"]
+    )
+
+    # --- STEP 1: segmentazione temporale ---
+    df["gap"] = (
+        df.groupby(["satellite_id", "station_id", "passage_id"])["start_time"]
+        .diff()
+        .gt(pd.Timedelta(seconds=600))
+    )
+
+    df["block_id"] = (
+        df.groupby(["satellite_id", "station_id", "passage_id"])["gap"]
+        .cumsum()
+    )
+
+    # --- STEP 2: blocchi ---
+    blocks = (
+        df.groupby(
+            ["satellite_id", "station_id", "passage_id", "block_id"]
+        )
+        .agg(
+            block_start=("start_time", "min"),
+            block_end=("stop_time", "max"),
+            tasks=("task_name", list),
+        )
+        .reset_index()
+    )
+
+    # --- STEP 3: passaggi ---
+    passages = (
+        blocks.groupby(["satellite_id", "station_id", "passage_id"])
+        .agg(
+            start_time=("block_start", "min"),
+            end_time=("block_end", "max"),
+            operations=("tasks", list),
+        )
+        .reset_index()
+    )
+
+    return passages_df_to_llm_json(passages)
+
+def passages_df_to_llm_json(passages_df):
+    passages = []
+
+    for _, row in passages_df.iterrows():
+
+        # costruzione fasi
+        phases = []
+        for i, block in enumerate(row["operations"]):
+            phases.append({
+                "phase_id": i,
+                "tasks": block
+            })
+
+        passage = {
+            "passage_id": row["passage_id"],
+            "satellite": row["satellite_id"],
+            "station": row["station_id"],
+            "start": row["start_time"].isoformat(),
+            "end": row["end_time"].isoformat(),
+            "phases": phases
+        }
+
+        passages.append(passage)
+
+    return json.dumps({"passages": passages}, indent=2)
+
+
+def get_soe_from_xml(path, date_start=None, date_end=None):
+    tree = ET.parse(path)
+    root = tree.getroot()
+    soe_data = []
+    for event, elem in ET.iterparse(path, events=('end',)):
+        if elem.tag == "data":
+            for child in elem:
+                #print(f"Tag: {child.tag}")
+                for subchild in child:
+                    #  print(f"  Subtag: {subchild.tag}, Value: {subchild.text}")
+                    if subchild.tag == "EPOCH":
+                        subchild_date = pd.to_datetime(subchild.text)
+                        if date_start and subchild_date < pd.to_datetime(date_start):
+                            continue
+                        if date_end and subchild_date > pd.to_datetime(date_end):
+                            continue
+                        soe_data.append({
+                            "event": child.tag,
+                            "time": subchild.text 
+                        })
+    return json.dumps(soe_data, indent=2)
+
+
+
+
+
 
 if __name__ == '__main__':
     # Example usage of the correlate_planning_data function
@@ -125,6 +264,13 @@ if __name__ == '__main__':
     cmp_data = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\INPUT\IME01_PL_PPF_CMP_20260311T133622_20260318T000000_20260320T000000_DEV_001.xml"
     task_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\TASK_PLAN_NOMINAL_20260318.csv"
         
-    df = get_csv_task_plan(task_path, date_start="2026-03-18", date_end="2026-03-18", acquisition_filter=True)
-    #df = json.dumps(df.to_dict(orient="records"), default=str, separators=(",", ":"))  # Convert DataFrame to JSON string, handling datetime serialization
-    print(df)
+    #df = get_csv_task_plan(task_path, date_start="2026-03-15 16:50:00", date_end="2026-03-30 18:00:00", acquisition_filter=False, station_filter=True)
+    
+    passages = get_passages_from_xml(task_path,  date_start="2026-03-15 11:00:00", date_end="2026-03-18 12:00:00")
+    print(passages)
+
+    soe = get_soe_from_xml(r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example\INPUT\IME01_SOE_20260309T131820_020.xml", date_start="2026-01-07 11:00:00", date_end="2026-01-07 12:00:00")
+    print(soe)
+
+    tickets = get_tickets()
+    print(tickets)

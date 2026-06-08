@@ -24,7 +24,6 @@ class GraphEngine:
         
         # 1. Creiamo gli agenti necessari al grafo
         self.llms = {
-            "dispatcher": self.factory.create_agent("dispatcher"),
             "master": self.factory.create_agent("master"),
             "kb": self.factory.create_agent("kb"),
             "query": self.factory.create_agent("query"),
@@ -56,14 +55,22 @@ class GraphEngine:
     def _build_graph(self):
         workflow = StateGraph(AgentState)
 
-        workflow.add_node("dispatcher", self.nodes.dispatcher_node)
+        #workflow.add_node("dispatcher", self.nodes.dispatcher_node)
+        workflow.add_node("agent", self.nodes.master_node)
         workflow.add_node("tools", self.nodes.tool_node)
-        workflow.add_node("master", self.nodes.master_node)
 
-        workflow.set_entry_point("dispatcher")
-        workflow.add_edge("dispatcher", "tools")
-        workflow.add_edge("tools", "master")
-        workflow.add_edge("master", END)
+        workflow.set_entry_point("agent")
+
+        workflow.add_conditional_edges(
+            "agent",
+            self.should_continue,
+            {
+                "call_tools": "tools",
+                "final": END
+            }
+        )
+
+        workflow.add_edge("tools", "agent")
 
         memory = MemorySaver()
 
@@ -75,7 +82,9 @@ class GraphEngine:
             "messages": [HumanMessage(content=user_query)],
             "tools_to_call": [],
             "tool_results": {},
-            "final_answer": ""
+            "investigation_state": {},
+            "final_answer": "",
+            "iteration": 0
         }
 
         final_state = self.app.invoke(
@@ -90,6 +99,13 @@ class GraphEngine:
             config={"configurable": {"thread_id": chat_id}},
             values={"messages": messages}
         )
+    
+    def should_continue(self, state: AgentState):
+        print('Checking if should continue with tools', state.get("tools_to_call", []))
+        if state.get("tools_to_call") and state["iteration"] < 3:
+            return "call_tools"
+ 
+        return "final"
 
 
 

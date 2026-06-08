@@ -1,3 +1,4 @@
+import json
 from pyexpat.errors import messages
 from typing import Dict
 from langchain_core.messages import AIMessage
@@ -26,31 +27,59 @@ class GraphNodes:
 
     def tool_node(self, state: AgentState):
 
-       
+        results = state.get("tool_results", {})
 
-        results = {}
+        tool_calls = state.get("tools_to_call", [])
 
-        for tool_name in state["tools_to_call"]:
-            results[tool_name] = self.tool_executor.execute(tool_name,  state["messages"])
+        for tool_call in tool_calls:
+            results[tool_call] = self.tool_executor.execute(
+                tool_call,
+                state
+            )
+            print(f'Executed tool {tool_call} with result {results[tool_call]}')
 
-        print(f"[TOOL RESULTS]\n {results}")
         return {
-            "tool_results": results
+            "tool_results": results,
+            "tools_to_call": []
         }
 
     def master_node(self, state: AgentState):
 
         messages = state["messages"]
-        history_text = conversation_to_text(messages[-7:-1])  
+        history_text = conversation_to_text(messages[-3:])
 
-        tool_results = state.get("tool_results", {})
 
         response = self.llms["master"].speak({
             "conversation_history": history_text,
             "user_query": messages[-1].content,
-            "tool_results": tool_results
+            "tool_results": state.get("tool_results", {}),
+            "investigation_state": state.get("investigation_state", {})
         })
 
+        print('Running master', response)
+
+        parsed = self.extract_json(response)
+
+        
         return {
-            "messages": [AIMessage(content=response)],
+            "investigation_state": parsed.get("updated_state", {}),
+            "tools_to_call": parsed["decision"].get("tool_calls", []),
+ 
+            "iteration": state["iteration"] + 1 
         }
+    
+    def extract_json(self, text: str):
+        # 1. elimina code fences
+        text = text.replace("```json", "").replace("```", "").strip()
+
+        # 2. trova primo blocco JSON plausibile
+        start = text.find("{")
+        end = text.rfind("}")
+
+        if start == -1 or end == -1:
+            raise ValueError("No JSON found")
+
+        json_str = text[start:end+1]
+
+        # 3. parse
+        return json.loads(json_str)
