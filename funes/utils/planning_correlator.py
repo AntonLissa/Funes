@@ -254,23 +254,48 @@ def get_soe_from_xml(path, date_start=None, date_end=None):
 
 
 
+def get_all_plans( date_start=None, date_end=None, satellite=None, station=None):
+    with open('C:\\Users\\anton\\Documents\\python projects\\FUNES\\Funes\\data_examples\\validation_data\\SAT_planning.json', 'r') as f:
+        data = json.load(f)
 
+        df = pd.json_normalize(
+                data, 
+                record_path=['planning', 'activities'], 
+                meta=[
+                    ['planning', 'satellite_id'],
+                    ['planning', 'passage_id'],
+                    ['planning', 'station_id'],
+                    ['planning', 'start_time'],
+                    ['planning', 'stop_time']
+                ]
+            )
+        
+        # Rinominiamo le colonne per pulizia
+        df = df.rename(columns={
+            'planning.satellite_id': 'satellite_id',
+            'planning.passage_id': 'passage_id',
+            'planning.station_id': 'station_id',
+            'planning.start_time': 'pass_start',
+            'planning.stop_time': 'pass_stop'
+        })
+        
+        # Convertiamo in datetime per poter filtrare le date
+        df['start_time'] = pd.to_datetime(df['start_time'])
+        
+        # 2. Filtraggio condizionale
+        mask = pd.Series(True, index=df.index)
+        
+        if satellite:
+            mask &= (df['satellite_id'] == satellite)
+        if station:
+            mask &= (df['station_id'] == station)
+        if date_start:
+            mask &= (df['start_time'] >= pd.to_datetime(date_start))
+        if date_end:
+            mask &= (df['start_time'] <= pd.to_datetime(date_end))
+        
+    return df[mask]
 
 
 if __name__ == '__main__':
-    # Example usage of the correlate_planning_data function
-    task_plan_Acq = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\TASK_PLAN_ACQ_20260317.csv"
-    time_tagged_data = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\IME01_24032026095915680_TIME_TAGGED.xml"
-    cmp_data = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data examples\planning example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\INPUT\IME01_PL_PPF_CMP_20260311T133622_20260318T000000_20260320T000000_DEV_001.xml"
-    task_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\TASK_PLAN_NOMINAL_20260318.csv"
-        
-    #df = get_csv_task_plan(task_path, date_start="2026-03-15 16:50:00", date_end="2026-03-30 18:00:00", acquisition_filter=False, station_filter=True)
-    
-    passages = get_passages_from_xml(task_path,  date_start="2026-03-15 11:00:00", date_end="2026-03-18 12:00:00")
-    print(passages)
-
-    soe = get_soe_from_xml(r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example\INPUT\IME01_SOE_20260309T131820_020.xml", date_start="2026-01-07 11:00:00", date_end="2026-01-07 12:00:00")
-    print(soe)
-
-    tickets = get_tickets()
-    print(tickets)
+    print(get_all_plans(satellite="SAT-01"))

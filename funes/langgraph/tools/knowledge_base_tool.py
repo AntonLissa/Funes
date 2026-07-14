@@ -15,16 +15,17 @@ class KnowledgeBaseTool(BaseTool):
         return "knowledge_base_tool"
 
     def run(self, conversation):
-
+  
         if not conversation:
             return ""
 
         query = conversation[-1].content
 
+
         history_messages = conversation[-7:-1]  
 
         history_text = conversation_to_text(history_messages)
-        
+  
 
         data = {
             "user_query": query,
@@ -34,6 +35,7 @@ class KnowledgeBaseTool(BaseTool):
         query_enhanced = self.query_llm.speak(data)
 
         rag_data = self.storage_manager.get_kb_results(query_enhanced)
+
 
         data = {
             "rag_data": rag_data,

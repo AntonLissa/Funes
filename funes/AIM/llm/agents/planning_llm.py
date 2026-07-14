@@ -16,9 +16,9 @@ class PlanningLLM(BaseLLM):
     def build_prompt(self, data):
 
         return self.user_prompt.format(
-            planning_data=data['planning_data'],
-            datetime=data['datetime'],
-            satellite_passages=data['satellite_passages'],
-            sequence_of_events=data['soe'],
+            remaining_iterations=data['remaining_iterations'],
+            conversation_history=data['conversation_history'],
+            critic_feedback=data['critic_feedback'],
+            called_tools=data['called_tools'],
             user_query=data['user_query'],
         )

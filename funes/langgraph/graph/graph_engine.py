@@ -28,7 +28,7 @@ class GraphEngine:
             "kb": self.factory.create_agent("kb"),
             "query": self.factory.create_agent("query"),
             "planning": self.factory.create_agent("planning"),
-            "lt_memory": self.factory.create_agent("long_term_memory")
+            "planner_llm": self.factory.create_agent("planner"),
         }
 
         # 2. Setup dei Tool

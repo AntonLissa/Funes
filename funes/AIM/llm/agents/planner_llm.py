@@ -3,11 +3,12 @@
 from funes.AIM.config import config_loader
 from funes.AIM.core.agent_factory import AgentFactory
 from funes.AIM.llm.agents.base_llm import BaseLLM
+
 import re 
 import json
 
-class DispatcherLLM(BaseLLM):
-    agent_type="dispatcher"
+class PlannerLLM(BaseLLM):
+    agent_type="planner_llm"
 
     def __init__(self, model_name, prompts, provider):
             super().__init__(
@@ -17,21 +18,24 @@ class DispatcherLLM(BaseLLM):
                 provider=provider
             )
 
-    def get_reasoning_and_tools(self, query, conversation_history):
+    def get_reasoning_and_tools(self, data):
         try:
-            # Otteniamo la risposta testuale dall'LLM
-            data = {'user_query': query, 'conversation_history': conversation_history}
-            print(f"[DISPATCHER LLM] Data sent to LLM:\n{data}")
             llm_answer = self.speak(data)
+            if llm_answer.startswith("```"):
+                llm_answer = llm_answer[3:]
+
+            if llm_answer.endswith("```"):
+                llm_answer = llm_answer[:-3]
             data = json.loads(llm_answer)
             
    
             return {
-                'analysis': data['analysis'],
-                'tools': data['tools']
+                "goal": data.get("goal", ""),
+                "plan_reasoning": data.get("plan_reasoning", ""),
+                "execution_plan": data.get("execution_plan", []),
             }
         except Exception as e:
-            print(f"Errore durante l'analisi della risposta del dispatcher: {str(e)}")
+            print(f"Errore durante l'analisi della risposta del planner: {str(e)}")
             return {
                 'analysis': "Non sono riuscito ad analizzare la query.",
                 'tools': []
@@ -39,7 +43,7 @@ class DispatcherLLM(BaseLLM):
 
 
     def build_prompt(self, data):
-            return self.user_prompt.format(user_query = data['user_query'], conversation_history = data['conversation_history'])
+            return self.user_prompt.format(user_query = data['user_query'], conversation_history = data['conversation_history'], critic_feedback = data['critic_feedback'], called_tools = data['called_tools'])
 
 
 if __name__ == '__main__':
@@ -51,10 +55,9 @@ if __name__ == '__main__':
     config_loader = ConfigLoader()
     provider = GroqProvider(config_loader.load_api_key())
     factory = AgentFactory(registry, config_loader, provider)
-    agent = factory.create_agent("dispatcher")
+    agent = factory.create_agent("planner_llm")
     queries = [
     # --- SEMPLICI ---
-    "What is the current spacecraft health status?",
     "Check network connectivity of all ground stations",
     "Show latest telemetry anomalies",
     "What are the upcoming planned passes for today?",
@@ -110,16 +113,11 @@ if __name__ == '__main__':
     ]
 
     cont = 0
-    for i in range(0, len(queries)):
+    for i in range(0, 1):
         print("_"*30)
-        q = queries[i]
+        q = "Is the anomaly reported in ticket OPS-231 related to the FDS maneuver?"
         print(f"- Question: {q}")
-        answer = agent.get_reasoning_and_tools(query = q, conversation_history = "")
+        answer = agent.get_reasoning_and_tools(data={'user_query': q, 'conversation_history': [], 'critic_feedback': '', 'called_tools': []})
         for elem in answer:
             print(f"    - {elem}: {answer[elem]}")
         
-        for tool in correct_tools[i]:
-                if tool not in answer['tools']:
-                    print(f"    - Risposta mancante/errata per {elem}: {tool} non in {answer['tools']}")
-                    cont += 1
-    print(f"- Sono state sbagliate {cont}/{len(queries)}")

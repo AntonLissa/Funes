@@ -16,6 +16,8 @@ class AgentFactory:
 
         agent_class = self.registry[agent_type]
 
+        if agent_type not in self.llm_config:
+            raise ValueError(f"Configurazione per l'agente '{agent_type}' non trovata nel file di configurazione")
         prompts = {
             "system_prompt": self.llm_config[agent_type]["system_prompt"],
             "user_prompt": self.llm_config[agent_type]["user_prompt"]

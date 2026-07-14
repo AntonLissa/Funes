@@ -15,7 +15,7 @@ from funes.Storage.rag_system.embeddings.sentence_transformer import SentenceTra
 from funes.Storage.rag_system.memory.bm25_index import BM25Index
 from funes.Storage.rag_system.memory.knowledge_base_memory import KBMemory
 from funes.Storage.rag_system.vector_store.chroma_store import ChromaStore
-from funes.utils.planning_correlator import get_csv_task_plan, get_passages_from_xml
+from funes.utils.planning_correlator import get_all_plans, get_csv_task_plan, get_passages_from_xml
 
 class StorageManager:
     def __init__(self, light_mode = True):
@@ -65,10 +65,8 @@ class StorageManager:
             "soe": ""
         }
 
-    def get_planning_data(self, date_start=None, date_end=None, satellite=None):
-        task_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\OUTPUT\TASK_PLAN_NOMINAL_20260318.csv"
-        #return get_csv_task_plan(task_path, date_start=date_start, date_end=date_end, acquisition_filter=True)
-        return get_passages_from_xml(task_path, date_start=date_start, date_end=date_end)
+    def get_planning_data(self, date_start=None, date_end=None, satellite=None, station=None):
+        return get_all_plans(date_start=date_start, date_end=date_end, satellite=satellite, station=station)
     
     def get_orbit_from_json(self):
         json_path = r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\planning_example\REGRESSION-TEST-20260324\REGRESSION-TEST-20260324\PLANNING\INPUT\IME01_CTBL_20260316T000000_20260321T000000_001.json"

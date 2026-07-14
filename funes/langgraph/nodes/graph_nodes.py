@@ -34,7 +34,7 @@ class GraphNodes:
         for tool_call in tool_calls:
             results[tool_call] = self.tool_executor.execute(
                 tool_call,
-                state
+                state.get("messages", [])
             )
             print(f'Executed tool {tool_call} with result {results[tool_call]}')
 

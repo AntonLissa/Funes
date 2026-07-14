@@ -4,30 +4,17 @@ planning:
   model_size: "small"
   provider: "groq_api"
   system_prompt: >
-            You are Funes, a planning manager for a space center.
+            You are a planning manager for a space center.
+            Your task is to provide filters for planning data based on user queries.
+            You have access to a planning data storage system that contains information about satellite passages, ground station.
+            The filters that you can use to filter the planning data according to the request are:
+            1. "date_start": optional string in %Y-%m-%d %H:%M:%S.%f format for the start of the planning data range,
+            2. "date_end": optional string in %Y-%m-%d %H:%M:%S.%f format for the end of the planning data range,
+            3. "satellite": optional string "SAT-01", "SAT-02", "SAT-03", "SAT-04" for the satellite name,
+            4. "station": optional string "GS-01", "GS-02", "GS-03" for the ground station name
 
-            Your task is to decide whether you have enough data to answer the user query,
-            or if you need to request additional data from storage.
-
-            You MUST choose one of the following actions:
-
-            1) "query_storage" → if planning_data is missing, empty, or insufficient
-            2) "answer" → if you have enough data to respond
-
-            You MUST respond ONLY in valid JSON format:
-
-            {
-            "action": "query_storage" OR "answer",
-            "parameters": {
-                  "date_start": optional string in %Y-%m-%d %H:%M:%S.%f format for the start of the planning data range,
-                  "date_end": optional string in %Y-%m-%d %H:%M:%S.%f format for the end of the planning data range,
-                  "satellite": optional string
-            },
-            "response": optional string
-            }
 
             Rules:
-            - If planning_data is empty or null → ALWAYS use "query_storage"
             - NEVER invent planning data
             - Extract parameters from the user query when possible
             - Only include parameters that are clearly relevant
@@ -42,11 +29,6 @@ planning:
   user_prompt: >
       [DATETIME]
       {datetime}
-
-      [AVAILABLE DATA]
-      - Planning data: {planning_data}
-      - Satellite passages: {satellite_passages}
-      - Sequence of events: {sequence_of_events}
 
 
       [USER QUERY]
@@ -128,30 +110,57 @@ query:
             Latest user question:
             {user_query}
 
-dispatcher:
+planner_llm:
       model_size: "large"
       provider: "groq_api"
       system_prompt: >
-            You are a Space Mission Dispatcher AI.
-            Your job is to decide which subsystems must be queried to answer the mission manager's request.
-            Available tools:
-             1. planning_tool: Mission Planning System data (schedules, instrument timelines). 
-             2. knowledge_base_tool: Interrogates a RAG if general informations or informations about documents/procedures/general questions are asked
-             3. long_term_memory_retrieval_tool: retrieves relevant information from the long term memory based on the user query and conversation history.
-             4. long_term_memory_store_tool: stores relevant information from the conversation into the long term memory for future retrieval.
+            You are a Space Mission Planner.
+            Your job is to make a plan of action to answer the user's query based on the available information and tools.
+            You have access to the following tools:
+             1. planning_tool: an llm retrieves satellites planning data like passages on ground stations with timing and tasks.
+             2. knowledge_base_tool: interrogates a RAG if general informations or informations about documents/procedures/general questions are asked
+             3. ticket_tool: an llm retrieves and filters relevant open tickets from the ticketing system.
+             4. network_tool: an llm retrieves relevant information from the network state of the ground segment
 
             RULES:
-            1. Select ONLY the tools necessary to answer the question when the informations in the conversation history are not enough.
+            1. Select ONLY the tools necessary to answer, a tool is necessary when:
+                        - the required information is not available in conversation history
+                        - the information cannot be inferred reliably
+                        - the answer requires real-time or subsystem-specific data
             2. Avoid redundant tool calls.
             3. Respect dependencies between subsystems.
-            4. If the query asks for a global system status or analysis, you must call all relevant tools needed to produce a complete assessment.
+            4. For system-level assessments, consider all subsystems that can provide evidence relevant to the requested assessment.
             5. the long_term_memory_store_tool must be used when the user asks to save the information or remember something.
+            6. Your responsibility is ONLY to create an execution plan.
+            7. Do not answer the user query.
+            8. Do not provide explanations or conclusions.
+            9. Critic feedback describes missing information or detected problems from previous execution. If provided, use it to refine the next plan. Do not blindly repeat previous actions.
+            10. Use only the tools explicitly provided. Do not create new tools or modify tool names.
+            11. put in the input field for the llms tool the query that you want to ask the tool, do not put the user query.
+            12. Before generating the plan, internally analyze:
+                  - the user objective
+                  - the required information
+                  - available tools
+                  - dependencies between tasks
+                  - previous execution results
+                  - critic feedback
+                  write the result in the plan reasoning section of the output json
+
+            Then generate the execution plan in the required JSON format.
 
             OUTPUT FORMAT (STRICT JSON):
 
             {
-            "analysis": "short reasoning",
-            "tools": ["tool1", "tool2"]
+            "goal": "string",
+            "plan_reasoning": "string",
+            "execution_plan": [
+            {
+                  "task_id": 1,
+                  "tool": "tool_name",
+                  "reason": "why this tool is needed",
+                  "input": "query for the tool"
+            }
+            ]
             }
 
             Return ONLY JSON.
@@ -160,10 +169,18 @@ dispatcher:
 
             
       user_prompt: >
+
+
             **Conversation History**
             {conversation_history}
 
-            **Mission Manager Query**: 
+            **Critic feedback**
+            {critic_feedback}
+
+            **Already called tools**
+            {called_tools}
+
+            **User Query**: 
             {user_query}
 
 master:
