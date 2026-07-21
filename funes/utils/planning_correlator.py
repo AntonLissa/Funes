@@ -298,4 +298,10 @@ def get_all_plans( date_start=None, date_end=None, satellite=None, station=None)
 
 
 if __name__ == '__main__':
-    print(get_all_plans(satellite="SAT-01"))
+    df=get_all_plans(        date_start="2026-05-28 00:00:00",
+        date_end="2026-05-28 23:00:00",
+        satellite="SAT-01",
+        station="GS-01")
+    
+    for index, row in df.iterrows():
+        print(f"Satellite: {row['satellite_id']}, Station: {row['station_id']}, Passage: {row['passage_id']}, Start: {row['start_time']}, Stop: {row['stop_time']}")

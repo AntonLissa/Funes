@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 from pyexpat.errors import messages
 from typing import Dict
 from langchain_core.messages import AIMessage
@@ -14,34 +15,65 @@ class GraphNodes:
         self.tool_executor = tool_executor
 
     def dispatcher_node(self, state: AgentState):
-        messages = state["messages"]  # Prendi solo gli ultimi 10 messaggi per il contesto
-        conversation_history = conversation_to_text(messages[-10:-1])
+
+        messages = state["messages"]
         last_user_message = messages[-1].content
 
-        result = self.llms["dispatcher"].get_reasoning_and_tools(query = last_user_message, conversation_history = conversation_history)
+        data = {
+            "conversation_history": "",
+            "user_query": last_user_message,
+            "critic_feedback": state.get("critic_feedback", {}).get("recommended_tool_calls", ""),
+            "called_tools": state.get("called_tools", [])
+        }
+
+
+        result = self.llms["planner_llm"].get_reasoning_and_tools(data)
+
+        print("[DISPATCHER NODE]:", result, '\n\n',data)
 
         return {
-            "tools_to_call": result["tools"]
-        }
+            "plan_reasoning": [
+                result.get("plan_reasoning", "")
+            ],
+            "execution_plan": result.get("execution_plan", []),
+            "tools_to_call": result.get("execution_plan", []),
+            "called_tools":state.get("called_tools", []) + self.extract_tools(result.get("execution_plan", []))
+    }
+
+    def extract_tools(self, plan):
+        tools = []
+        for elem in plan:
+            tools.append(elem['tool_name'])
+        return tools
+
+
 
 
     def tool_node(self, state: AgentState):
 
         results = state.get("tool_results", {})
 
-        tool_calls = state.get("tools_to_call", [])
-
-        for tool_call in tool_calls:
-            results[tool_call] = self.tool_executor.execute(
-                tool_call,
-                state.get("messages", [])
+        tool_and_inputs = self.get_tools_to_call(state)
+        print(f"[TOOL NODE] Tools to call: {tool_and_inputs}")
+        for tool_call in tool_and_inputs:
+            result = self.tool_executor.execute(
+                tool_call["tool_name"],
+                tool_call["tool_input"]
             )
-            print(f'Executed tool {tool_call} with result {results[tool_call]}')
+            results[tool_call["tool_name"]] = result
 
         return {
             "tool_results": results,
             "tools_to_call": []
         }
+
+    def get_tools_to_call(self, state: AgentState):
+        tools_inputs = []
+        execution_plan = state.get("execution_plan", [])
+        for element in execution_plan:
+            print(f'- Processing Tool: {element["tool_name"]}, Parameters: {element["tool_input"]}')
+            tools_inputs.append({"tool_name": element["tool_name"], "tool_input": element["tool_input"]})
+        return tools_inputs
 
     def master_node(self, state: AgentState):
 
@@ -49,24 +81,43 @@ class GraphNodes:
         history_text = conversation_to_text(messages[-3:])
 
 
+
+        print(f">>[MASTER NODE]: Inputs ")
+        data = state.get("tool_results", {})
+        for elem in data:
+            print("\n  >>", elem, ":", data[elem])
+
         response = self.llms["master"].speak({
-            "conversation_history": history_text,
             "user_query": messages[-1].content,
-            "tool_results": state.get("tool_results", {}),
-            "investigation_state": state.get("investigation_state", {})
+            "tool_results": data
         })
 
-        print('Running master', response)
+        print(f"[MASTER NODE] Response: \n {response}")
 
-        parsed = self.extract_json(response)
+        return {"synthesized_response": response}
+    
+    def critic_node(self, state: AgentState):
+        messages = state["messages"]
 
-        
+        response = self.llms["critic_llm"].speak({
+            "user_query": messages[-1].content,
+            "tools_called": state.get("execution_plan", []),
+            "final_answer": state.get("synthesized_response", "")
+        })
+
+
+        try:
+            json_response = self.extract_json(response)
+            print(f"[CRITIC NODE]:\n {response}")
+        except ValueError as e:
+            print(f"[CRITIC NODE] Error extracting JSON: {e}")
+            json_response = {}
+
+
         return {
-            "investigation_state": parsed.get("updated_state", {}),
-            "tools_to_call": parsed["decision"].get("tool_calls", []),
- 
-            "iteration": state["iteration"] + 1 
-        }
+                "critic_feedback": json_response,
+                "remaining_iterations": state["remaining_iterations"] - 1
+            }
     
     def extract_json(self, text: str):
         # 1. elimina code fences

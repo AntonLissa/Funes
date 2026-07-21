@@ -24,11 +24,17 @@ class GroqProvider(BaseProvider):
             for attempt in range(max_retries):
                 try:
                     response = requests.post(self.url, headers=headers, json=data)
-                    if response.status_code in [429, 500]:
-                        print(f"[GroqProvider] Received {response.status_code}, retrying in 5s...")
+                    if response.status_code == 429:
+                        print("[GroqProvider] Rate limit raggiunto. Attendo 60 secondi...")
+
+                        time.sleep(70)
+                        continue
+
+                    if response.status_code >= 500:
+                        print("[GroqProvider] Errore server Groq. Riprovo tra 5 secondi...")
+
                         time.sleep(5)
                         continue
-                    response.raise_for_status()
                     return response.json()["choices"][0]["message"]["content"].strip()
                 except requests.RequestException as e:
                     print(f"[GroqProvider] Attempt {attempt+1}/{max_retries} failed for prompt:\n'{user_prompt}'\nError: {e}")

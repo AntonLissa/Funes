@@ -110,6 +110,13 @@ def conversation_to_text(messages):
     
     return "\n".join([f"{msg.type.upper()}: {msg.content}" for msg in messages])
 
+def remove_json_strings(text):
+    if text.startswith("```"):
+        text = text[3:]
 
+    if text.endswith("```"):
+        text = text[:-3]
+
+    return text.strip()
 
 

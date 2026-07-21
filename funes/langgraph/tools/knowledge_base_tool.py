@@ -15,6 +15,7 @@ class KnowledgeBaseTool(BaseTool):
         return "knowledge_base_tool"
 
     def run(self, conversation):
+        return "No data needed to answer, this is just a test"
   
         if not conversation:
             return ""

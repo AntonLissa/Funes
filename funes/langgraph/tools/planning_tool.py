@@ -1,5 +1,7 @@
 import datetime
 import json
+from funes.Storage import storage_manager
+from funes.utils.utils import remove_json_strings
 
 from funes.langgraph.tools.base_tool import BaseTool
 
@@ -13,70 +15,32 @@ class PlanningTool(BaseTool):
     def name(self):
         return "planning_tool"
 
-    def run(self, conversation):
+    def run(self, query):
 
-        if not conversation:
-            return ""
+        if not query:
+            return "Planning tool error: no query provided"
 
-        query = conversation[-1].content
 
         # STEP 1: primo payload (senza dati specifici)
         payload = {
-            "planning_data": [],
-            "datetime": datetime.datetime.now().isoformat(),
-            "satellite_passages": None,
-            "soe": None,
             "user_query": query,
         }
+
 
         llm_response = self.planning_llm.speak(payload)
 
         try:
-            parsed = json.loads(llm_response)
+            parsed = json.loads(remove_json_strings(llm_response))
         except Exception:
             # fallback: l’LLM ha deciso di fare arte invece che JSON
             return llm_response
 
-        # STEP 2: se serve interrogare lo storage
-        action = parsed.get("action")
+        start_date = parsed.get("date_start")
+        end_date = parsed.get("date_end")
+        satellite = parsed.get("satellite")
+        station = parsed.get("station")
+        print(f"[PLANNING TOOL] Parsed response from planning LLM: {parsed}")
+        result = self.storage_manager.get_planning_data(date_start=start_date, date_end=end_date, satellite=satellite, station=station)
 
-        if action not in ["query_storage", "answer"]:
-            return "Invalid LLM response format"
-        
-        if action == "query_storage":
-
-            filters = self._map_parameters(parsed.get("parameters", {}))
-            print(f"[PLANNING TOOL] Interrogazione storage con filtri: {filters}")
-            data = self.storage_manager.get_data_for_planning(filters)
-            return data
-            '''print(f"[PLANNING TOOL] Dati ricevuti dallo storage: {data}")
-
-            # STEP 3: seconda chiamata con dati veri
-            payload.update(data)
-
-            final_response = self.planning_llm.speak(payload)
-
-            try:
-                final_parsed = json.loads(final_response)
-                return final_parsed.get("response", final_response)
-            except Exception:
-                return final_response
-
-        # STEP 4: risposta diretta
-        return parsed.get("response", llm_response)'''
-
-    # -----------------------------
-    # mapping LLM → storage layer
-    # -----------------------------
-    def _map_parameters(self, params):
-        """
-        Traduce i parametri dell'LLM nel formato atteso dallo storage.
-        """
-
-
-        return {
-            "date_start": params.get("date_start"),
-            "date_end": params.get("date_end"),
-            "satellite": params.get("satellite"),
-            "time": params.get("time"),
-        }
+        print(f"[PLANNING TOOL] Retrieved data for planning: \n{result}")
+        return result

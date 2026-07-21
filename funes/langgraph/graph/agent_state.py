@@ -6,10 +6,10 @@ class AgentState(TypedDict):
     query: str
     chat_id: str
     messages: Annotated[List[BaseMessage], add_messages]
-    tools_to_call: List[str]
+    plan_reasoning: List[str]
+    execution_plan: List[Dict[str, str]]
+    remaining_iterations: int
     tool_results: Dict[str, str]
-    pending_tool_calls: List[Dict]
-
-    investigation_state: Dict
-    iteration: int
-    final_answer: str
+    synthesized_response: str
+    critic_feedback: Dict[str, str]
+    called_tools: List[str]

@@ -9,7 +9,7 @@ class ToolExecutor:
 
     def execute(self, tool_name: str, query: str) -> str:
         """Esegue il tool corrispondente al nome ricevuto."""
-        print('[EXECUTOR] Ricevuto comando per eseguire:', tool_name)
+        print('[EXECUTOR] Ricevuto comando per eseguire:', tool_name, "con query:", query)
         tool = self._tools.get(tool_name)
         
         if not tool:
@@ -18,6 +18,8 @@ class ToolExecutor:
         try:
             # Chiamiamo il metodo .run() della classe Tool
             print(f"[EXECUTOR] Eseguendo: {tool_name}...")
-            return tool.run(query)
+            result = tool.run(query)
+            print(f"[EXECUTOR] Result for {tool_name}: {result}")
+            return result
         except Exception as e:
             return f"Errore durante l'esecuzione di {tool_name}: {str(e)}"

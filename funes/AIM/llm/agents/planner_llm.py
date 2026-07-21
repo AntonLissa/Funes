@@ -27,12 +27,24 @@ class PlannerLLM(BaseLLM):
             if llm_answer.endswith("```"):
                 llm_answer = llm_answer[:-3]
             data = json.loads(llm_answer)
+
+            execution_plan = []
+
+            for elem in data.get("execution_plan", []):
+                tool_name = elem.get("tool")
+                tool_input = elem.get("input")
+                reason = elem.get("reason", "")
+                execution_plan.append({
+                    "tool_name": tool_name,
+                    "tool_input": tool_input,
+                    "reason": reason
+                })
             
    
             return {
                 "goal": data.get("goal", ""),
                 "plan_reasoning": data.get("plan_reasoning", ""),
-                "execution_plan": data.get("execution_plan", []),
+                "execution_plan": execution_plan,
             }
         except Exception as e:
             print(f"Errore durante l'analisi della risposta del planner: {str(e)}")
@@ -118,6 +130,6 @@ if __name__ == '__main__':
         q = "Is the anomaly reported in ticket OPS-231 related to the FDS maneuver?"
         print(f"- Question: {q}")
         answer = agent.get_reasoning_and_tools(data={'user_query': q, 'conversation_history': [], 'critic_feedback': '', 'called_tools': []})
-        for elem in answer:
-            print(f"    - {elem}: {answer[elem]}")
+        for elem in answer['execution_plan']:
+            print(elem)
         

@@ -20,14 +20,8 @@ class MasterLLM(BaseLLM):
             datetime=datetime.now(),
 
             user_query=data.get("query", ""),
-
-            conversation_history=data.get("conversation_history", []),
             
-            tool_results = data.get("tool_results", {}),
-
-            investigation_state = data.get("investigation_state", {}),
-
-            json_format = self.get_json_format_instructions()
+            tool_results = data.get("tool_results", {})
         )
     
     def get_json_format_instructions(self):

@@ -6,6 +6,8 @@ from funes.Storage.storage_manager import StorageManager
 from funes.langgraph.nodes.graph_nodes import GraphNodes
 from funes.langgraph.tools.knowledge_base_tool import KnowledgeBaseTool
 from funes.langgraph.tools.lt_memory_tool import LTMemoryTool
+from funes.langgraph.tools.network_tool import NetworkTool
+from funes.langgraph.tools.ticket_tool import TicketTool
 from funes.langgraph.tools.tool_executor import ToolExecutor
 from funes.AIM.config.config_loader import ConfigLoader
 from funes.AIM.core.agent_factory import AgentFactory
@@ -17,6 +19,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.messages import HumanMessage
 from funes.langgraph.tools.planning_tool import PlanningTool
 
+from pprint import pprint
 class GraphEngine:
     def __init__(self, factory, storage_manager):
         self.factory = factory
@@ -27,8 +30,11 @@ class GraphEngine:
             "master": self.factory.create_agent("master"),
             "kb": self.factory.create_agent("kb"),
             "query": self.factory.create_agent("query"),
-            "planning": self.factory.create_agent("planning"),
-            "planner_llm": self.factory.create_agent("planner"),
+            "planning_llm": self.factory.create_agent("planning_llm"),
+            "planner_llm": self.factory.create_agent("planner_llm"),
+            'critic_llm': self.factory.create_agent("critic_llm"),
+            
+            'ticket_llm': self.factory.create_agent("ticket_llm")
         }
 
         # 2. Setup dei Tool
@@ -40,11 +46,15 @@ class GraphEngine:
         )
         self.tool_executor.register(kb_tool)
 
-        planning_tool = PlanningTool(planning_llm=self.llms["planning"], storage_manager=self.storage_manager)
+        planning_tool = PlanningTool(planning_llm=self.llms["planning_llm"], storage_manager=self.storage_manager)
         self.tool_executor.register(planning_tool)
 
-        lt_memory_tool = LTMemoryTool(lt_memory_llm=self.llms["lt_memory"], storage_manager=self.storage_manager)
-        self.tool_executor.register(lt_memory_tool)
+        network_tool = NetworkTool(storage_manager=self.storage_manager)
+        self.tool_executor.register(network_tool)
+
+        ticket_tool = TicketTool(ticket_llm=self.llms["ticket_llm"], storage_manager=self.storage_manager)
+        self.tool_executor.register(ticket_tool)
+
 
         # 3. Setup dei Nodi (usando la tua classe GraphNodes)
         self.nodes = GraphNodes(self.llms, self.tool_executor)
@@ -55,22 +65,25 @@ class GraphEngine:
     def _build_graph(self):
         workflow = StateGraph(AgentState)
 
-        #workflow.add_node("dispatcher", self.nodes.dispatcher_node)
-        workflow.add_node("agent", self.nodes.master_node)
+        workflow.add_node("dispatcher", self.nodes.dispatcher_node)
         workflow.add_node("tools", self.nodes.tool_node)
+        workflow.add_node("master", self.nodes.master_node)
+        workflow.add_node("critic", self.nodes.critic_node)
 
-        workflow.set_entry_point("agent")
+        workflow.set_entry_point("dispatcher")
+
+        workflow.add_edge("dispatcher", "tools")
+        workflow.add_edge("tools", "master")
+        workflow.add_edge("master", "critic")
 
         workflow.add_conditional_edges(
-            "agent",
-            self.should_continue,
+            "critic",
+            self.after_critic,
             {
-                "call_tools": "tools",
-                "final": END
+                "continue": "dispatcher",
+                "finish": END,
             }
-        )
-
-        workflow.add_edge("tools", "agent")
+)
 
         memory = MemorySaver()
 
@@ -80,11 +93,10 @@ class GraphEngine:
 
         initial_state = {
             "messages": [HumanMessage(content=user_query)],
-            "tools_to_call": [],
-            "tool_results": {},
-            "investigation_state": {},
-            "final_answer": "",
-            "iteration": 0
+            "plan_reasoning": [],
+            "execution_plan": [],
+            "critic_feedback": {},
+            "remaining_iterations": 2
         }
 
         final_state = self.app.invoke(
@@ -100,12 +112,15 @@ class GraphEngine:
             values={"messages": messages}
         )
     
-    def should_continue(self, state: AgentState):
-        print('Checking if should continue with tools', state.get("tools_to_call", []))
-        if state.get("tools_to_call") and state["iteration"] < 3:
-            return "call_tools"
- 
-        return "final"
+    def after_critic(self, state):
+
+        feedback = state.get("critic_feedback", {})
+
+        if feedback.get("investigation_complete", False) or  state["remaining_iterations"] <= 0:
+            pprint('======= FINAL STATE ========', state)
+            return "finish"
+
+        return "continue"
 
 
 
@@ -125,7 +140,7 @@ if __name__ == '__main__':
     )
     
     # Manager per il database/vettore
-    storage_manager = StorageManager(light_mode=False)
+    storage_manager = StorageManager(light_mode=True)
 
     # 2. Inizializzazione del GraphEngine
     # Questo passaggio crea gli LLM, registra i Tool e compila il Grafo

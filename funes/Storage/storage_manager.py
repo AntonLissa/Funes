@@ -48,22 +48,6 @@ class StorageManager:
         search_results = self.kb.reranked_search(query, k=search_k)
         return search_results[0:final_k]
 
-    def get_data_for_planning(self, filters=None):
-
-        filters = filters or {}
-
-        planning_data = self.get_planning_data(
-            date_start=filters.get("date_start"),
-            date_end=filters.get("date_end"),
-            satellite=filters.get("satellite"),
-        )
-        
-        return {
-            "planning_data": planning_data,
-            "datetime": datetime.now().isoformat(),
-            "satellite_passages": "",
-            "soe": ""
-        }
 
     def get_planning_data(self, date_start=None, date_end=None, satellite=None, station=None):
         return get_all_plans(date_start=date_start, date_end=date_end, satellite=satellite, station=station)
@@ -75,26 +59,22 @@ class StorageManager:
         return json.dumps(data, default=str, separators=(",", ":")) 
     
 
+
+    # NETWORK
+    def get_network_data(self):
+        with open(r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\validation_data\network_status.txt", 'r') as f:
+            data = f.read()
+        return data
+
     # TICKET FUNCTIONALITIES
     def get_tickets(self):
-        # Implement logic to create a ticket in your ticketing system
-        ticket_list = pd.read_excel(r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\ticket\Ticket_MOC.xls")
-        # return 5 random tickets with seed for reproducibility
-        np.random.seed(19)
-        ticket_list = ticket_list.sample(5)
-        ticket_list = ticket_list[["Code", "Title", "Creation Date", "Description", "Status"]]
-        # add a fake ticket
-        fake_ticket = pd.DataFrame({
-            "Code": ["T001725"],
-            "Title": ["Antenna malfunction"],
-            "Creation Date": ["2026-03-15"],
-            "Description": ["Antenna malfunction detected in station A40P. Based on current telemetry and physical inspection requirements, the antenna will remain degraded or completely unavailable for at least the next 2 hours. This will impact all planned acquisitions for the next 2 hours. The issue is currently being investigated by the engineering team, and updates will be provided as soon as more information is available."],
-            "Status": ["Open"]
-        })
+        with open(r"C:\Users\anton\Documents\python projects\FUNES\Funes\data_examples\validation_data\tickets.json", 'r') as f:
+            data = json.load(f)
+        tickets = data["tickets"]
 
-        ticket_list = pd.concat([ticket_list, fake_ticket], ignore_index=True)
+        tickets = tickets[:10]
 
-        return ticket_list.to_dict(orient="records")
+        return tickets
     
     # CHAT FUNCTIONALITIES
     def create_chat(self, chat_id, user_id, agent):
@@ -112,9 +92,13 @@ class StorageManager:
 
 if __name__ == "__main__":
     storage_manager = StorageManager(light_mode=True)
-    data = storage_manager.get_data_for_planning({
-        "date_start": "2026-03-17",
-        "date_end": "2026-03-18",
-        "satellite": None})
+    data = storage_manager.get_planning_data(
+        date_start="2026-05-28 00:00:00.000000",
+        date_end="2026-05-28 23:00:00.000000",
+        satellite="SAT_01",
+        station="GS_01"
+    )
     
     print(data)
+
+    print(storage_manager.get_tickets())

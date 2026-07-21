@@ -1,10 +1,13 @@
 
 
+import json
+
 from funes.AIM.core.agent_factory import AgentFactory
 from funes.AIM.llm.agents.base_llm import BaseLLM
+from funes.Storage.storage_manager import StorageManager
 
-class PlanningLLM(BaseLLM):
-    agent_type="planning"
+class TicketLLM(BaseLLM):
+    agent_type="ticket"
 
     def __init__(self, model_name, prompts, provider):
         super().__init__(
@@ -18,9 +21,9 @@ class PlanningLLM(BaseLLM):
 
         return self.user_prompt.format(
             user_query=data['user_query'],
+            tickets = data.get("tickets", [])
+
         )
-
-
 
 if __name__ == '__main__':
     from funes.AIM.config.config_loader import ConfigLoader
@@ -31,7 +34,8 @@ if __name__ == '__main__':
     config_loader = ConfigLoader()
     provider = GroqProvider(config_loader.load_api_key())
     factory = AgentFactory(registry, config_loader, provider)
-    agent = factory.create_agent("planning_llm")
-    data = {"user_query": "Search the plannings for the satellite SAT-01 of the GS-01 on day 15th march 2026"}
+    agent = factory.create_agent("ticket_llm")
+    sm = StorageManager(light_mode=True)
+    data = {"user_query": "Are there any open tickets related to network problems?", "tickets" : sm.get_tickets()}
     print(agent.speak(data=data))
-        
+    print(json.loads(agent.speak(data=data)).get("tickets", []))
